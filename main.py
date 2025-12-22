@@ -10,5 +10,6 @@ condicao = Condition(
     lvalue=vida,
     cmp="=",
     rvalue=morto,
-    
+    flag=Flag.RESET_IF
 )
+print(f"string gerada: {condicao.render()}")
