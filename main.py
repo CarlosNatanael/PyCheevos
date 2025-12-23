@@ -1,13 +1,25 @@
-from core.helpers import byte, word, bit7
+from core.helpers import byte
+from core.constants import Flag
+from models.achievement import Achievement
 
-mario_state = byte(0x0750)
-powerup_type = byte(0x0756)
+conquista = Achievement(
+    id=558696,
+    title="Vença sem usar nitro",
+    description="vença a nitro sem usar nitro",
+    points=10,
+    badge="12345"
+)
 
-condicao1 = (mario_state == 1)
-condicao2 = (powerup_type != 0)
+nitro = byte(0x0005c7)
+evento = byte(0x0007dd)
 
-print(f"Condição 1: {condicao1.render()}")
-print(f"Condição 2: {condicao2.render()}")
+cond_vitoria = (evento == 0x07)
+conquista.add_condition(cond_vitoria)
 
-fase_concluida = (bit7(0x001F) == 1)
-print(f"Fase Concluída: {fase_concluida.render()}")
+cond_reset = (nitro < 0x04)
+cond_reset.flag = Flag.RESET_IF
+
+conquista.add_condition(cond_reset)
+
+print("--- Sáida para o arquivo do RA ---")
+print(f"\n{conquista.render()}")
