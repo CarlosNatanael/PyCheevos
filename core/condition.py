@@ -5,12 +5,18 @@ from typing import Union
 class Condition:
     def __init__(
             self,
-            lvalue: Union[MemoryValue, ConstantValue],
+            lvalue: Union[MemoryValue, ConstantValue, int],
             cmp: str = "=",
-            rvalue: Union[MemoryValue, ConstantValue] = None,
+            rvalue: Union[MemoryValue, ConstantValue, int] = None,
             flag: Flag = Flag.NONE,
             hits: int = 0
     ):
+        if isinstance(lvalue, int):
+            lvalue = ConstantValue(lvalue)
+
+        if isinstance(rvalue, int):
+           rvalue = ConstantValue(rvalue)
+        
         self.lvalue = lvalue
         self.cmp = cmp
         self.rvalue = rvalue
@@ -22,6 +28,7 @@ class Condition:
         
         parts = [self.flag.value]
         parts.append(self.lvalue.render())
+        
         if self.rvalue:
             parts.append(self.cmp)
             parts.append(self.rvalue.render())
