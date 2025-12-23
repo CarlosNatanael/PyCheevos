@@ -1,4 +1,3 @@
-# main.py
 from core.helpers import byte, word, bit7
 
 mario_state = byte(0x0750)
