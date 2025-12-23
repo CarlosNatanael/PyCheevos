@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List
 from core.condition import Condition
 
 class Achievement:
@@ -7,7 +7,7 @@ class Achievement:
         title: str, 
         description: str, 
         points: int, 
-        id: int = 111000001,
+        id: int = 1, 
         badge: str = "00000"
     ):
         self.id = id
@@ -21,17 +21,11 @@ class Achievement:
     def add_condition(self, condition: Condition):
         self.conditions.append(condition)
         return self
-    
-    def add_conditions(self, conditions: list):
+
+    def add_conditions(self, conditions: List[Condition]):
         self.conditions.extend(conditions)
         return self
 
     def render(self) -> str:
         mem_string = "_".join([c.render() for c in self.conditions])
-        return (
-            f'{self.id}:"{mem_string}":{self.title}:{self.description}:'
-            f':::::{self.author}:{self.points}:::::{self.badge}'
-        )
-    
-    def __str__(self):
-        return self.render()
+        return f'{self.id}:"{mem_string}":{self.title}:{self.description}::::{self.author}:{self.points}:::::{self.badge}'

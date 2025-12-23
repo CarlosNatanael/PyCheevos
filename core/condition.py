@@ -11,21 +11,20 @@ class Condition:
             flag: Flag = Flag.NONE,
             hits: int = 0
     ):
-        if isinstance(lvalue, int):
-            lvalue = ConstantValue(lvalue)
+        if isinstance(lvalue, int): lvalue = ConstantValue(lvalue)
+        if isinstance(rvalue, int): rvalue = ConstantValue(rvalue)
 
-        if isinstance(rvalue, int):
-           rvalue = ConstantValue(rvalue)
-        
         self.lvalue = lvalue
         self.cmp = cmp
         self.rvalue = rvalue
         self.flag = flag
         self.hits = hits
     
+    def with_hits(self, hits: int):
+        self.hits = hits
+        return self
+
     def render(self) -> str:
-        """Gera a string final que o RA entende"""
-        
         parts = [self.flag.value]
         parts.append(self.lvalue.render())
         
