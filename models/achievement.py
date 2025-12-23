@@ -22,6 +22,10 @@ class Achievement:
         self.conditions.append(condition)
         return self
     
+    def add_conditions(self, conditions: list):
+        self.conditions.extend(conditions)
+        return self
+
     def render(self) -> str:
         mem_string = "_".join([c.render() for c in self.conditions])
         return (
