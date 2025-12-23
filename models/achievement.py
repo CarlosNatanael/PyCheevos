@@ -16,7 +16,16 @@ class Achievement:
         self.points = points
         self.badge = badge
         self.author = "PyCheevos"
+
+        self.core: List[Condition] = []
         self.conditions: List[Condition] = []
+
+    def add_core(self, conditions: List[Condition]):
+        if isinstance(conditions, List):
+            self.core.extend(conditions)
+        else:
+            self.core.extend(conditions)
+        return self
 
     def add_condition(self, condition: Condition):
         self.conditions.append(condition)
