@@ -1,15 +1,14 @@
-from core .constants import MemorySize, Flag
-from core .value import MemoryValue, ConstantValue
-from core .condition import Condition
+# main.py
+from core.helpers import byte, word, bit7
 
-vida = MemoryValue(0x0055, MemorySize.BIT8)
+mario_state = byte(0x0750)
+powerup_type = byte(0x0756)
 
-morto = ConstantValue(0)
+condicao1 = (mario_state == 1)
+condicao2 = (powerup_type != 0)
 
-condicao = Condition(
-    lvalue=vida,
-    cmp="=",
-    rvalue=morto,
-    flag=Flag.RESET_IF
-)
-print(f"string gerada: {condicao.render()}")
+print(f"Condição 1: {condicao1.render()}")
+print(f"Condição 2: {condicao2.render()}")
+
+fase_concluida = (bit7(0x001F) == 1)
+print(f"Fase Concluída: {fase_concluida.render()}")
