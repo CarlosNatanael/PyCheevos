@@ -1,3 +1,3 @@
 1.0
 Racing game - No nitro
-1:"0xH07dd=7.1._R:0xH05c7<4S0xH13de=0S0xH13de=1":Mestre da pista:Vença no circuito Italiano sem usar nitro::::PyCheevos:10:::::00000
+1:"0xH009e=0.1._0xH13de=14_0xH07d9=0_T:0xH07dd=7_d0xH07dd=13SR:0xH0076>0":Dano Teste:Vença no circuito Monaco sem nenhum dano::::PyCheevos:25:::::00000
