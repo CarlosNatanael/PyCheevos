@@ -2,7 +2,7 @@ from typing import List, Union
 from .constants import MemorySize, MemoryType, Flag
 
 class MemoryExpression:
-    def __init__(self, start_term):
+    def __init__(self, start_term): 
         self.terms = [(start_term, Flag.ADD_SOURCE)]
 
     def __add__(self, other):
@@ -11,6 +11,7 @@ class MemoryExpression:
     
     def __sub__(self, other):
         self.terms.append((other, Flag.SUB_SOURCE))
+        return self
 
     def _build_conditions(self, cmp: str, rvalue) -> List:
         from .condition import Condition
