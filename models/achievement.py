@@ -22,10 +22,10 @@ class Achievement:
         self.conditions: List[Condition] = []
 
     def add_core(self, conditions: List[Condition]):
-        if isinstance(conditions, List):
+        if isinstance(conditions, list):
             self.core.extend(conditions)
         else:
-            self.core.extend(conditions)
+            self.core.append(conditions)
         return self
     
     def add_alt(self, conditions: List[Condition]):
@@ -44,14 +44,20 @@ class Achievement:
         return self
 
     def _render_group(self, conditions: List[Condition]) -> str:
-        return "_".join([c.render() for c in conditions])
+        group = conditions if conditions else []
+        return "_".join([c.render() for c in group])
 
     def render(self) -> str:
-        core_string = self._render_group(self.core)
+        if self.conditions:
+            self.core.extend(self.conditions)
+            self.conditions = []
+
+        core_string = self._render_render_group(self.core)
+        
         if self.alts:
-            alt_strings = (self._render_group(alt) for alt in self.alts)
-            full_mem = core_string + "S:" + "S:".join(alt_strings).replace("S:", ":")
-            full_mem = core_string + ":" + ":".join(alt_strings)
+            alt_strings = [self._render_render_group(alt) for alt in self.alts]
+            
+            full_mem = core_string + "S" + "S".join(alt_strings)
         else:
             full_mem = core_string
         
@@ -59,3 +65,6 @@ class Achievement:
             f'{self.id}:"{full_mem}":{self.title}:{self.description}'
             f'::::{self.author}:{self.points}:::::{self.badge}'
         )
+
+    def _render_render_group(self, conditions: List[Condition]) -> str:
+        return "_".join([c.render() for c in conditions])

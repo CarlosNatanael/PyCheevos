@@ -1,3 +1,3 @@
 1.0
 Racing game - No nitro
-1:"0xH07dd=7.1._R:0xH05c7<4:":Mestre da pista:Vença no circuito Italiano sem usar nitro::::PyCheevos:10:::::00000
+1:"0xH07dd=7.1._R:0xH05c7<4S0xH13de=0S0xH13de=1":Mestre da pista:Vença no circuito Italiano sem usar nitro::::PyCheevos:10:::::00000
