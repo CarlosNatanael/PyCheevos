@@ -1,5 +1,4 @@
 from .constants import MemorySize, MemoryType
-from .condition import Condition
 
 class MemoryValue:
     def __init__(self, address: int, size: MemorySize = MemorySize.BIT8, mtype: MemoryType = MemoryType.MEM):
@@ -17,21 +16,27 @@ class MemoryValue:
         return MemoryValue(self.address, self.size, MemoryType.BCD)
 
     def __eq__(self, other):
+        from .condition import Condition
         return Condition(self, "=", other)
     
     def __ne__(self, other):
+        from .condition import Condition
         return Condition(self, "!=", other)
     
     def __gt__(self, other):
+        from .condition import Condition
         return Condition(self, ">", other)
     
     def __ge__(self, other):
+        from .condition import Condition
         return Condition(self, ">=", other)
     
     def __lt__(self, other):
+        from .condition import Condition
         return Condition(self, "<", other)
     
     def __le__(self, other):
+        from .condition import Condition
         return Condition(self, "<=", other)
 
     def render(self) -> str:
