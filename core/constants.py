@@ -1,10 +1,8 @@
 from enum import Enum
-
 class MemorySize(Enum):
-    """Mapeamento do tamanho da memoria para o prefixo da string"""
     BIT0        =   "M" # 0xM
     BIT1        =   "N" # 0xN   
-    BIT2        =   "0" # 0xO
+    BIT2        =   "O" # 0xO
     BIT3        =   "P" # 0xP
     BIT4        =   "Q" # 0xQ
     BIT5        =   "R" # 0xR
@@ -19,17 +17,28 @@ class MemorySize(Enum):
     BIT32_RE    =   "G" 
     LOWER4      =   "L" # 0xL
     UPPER4      =   "U" # 0xU
-  
+
+class MemoryType(Enum):
+    MEM     = ""
+    DELTA   = "d"
+    PRIOR   = "p"
+    BCD     = "b"
+    INVERT  = "~"
+
 class Flag(Enum):
-    """ Flags logica do retroachievements """
-    NONE          = ""
-    PAUSE_IF      = "P:"
-    RESET_IF      = "R:"
-    RESET_NEXT_IF = "Z:"
-    ADD_HITS      = "C:"
-    SUB_HITS      = "B:"
-    ADD_SOURCE    = "A:"
-    SUB_SOURCE    = "B:"
-    ADD_ADRESS    = "I:"
-    MEASURED      = "M:"
-    TRIGGER       = "T:"
+    NONE              = ""
+    PAUSE_IF          = "P:"
+    RESET_IF          = "R:"
+    RESET_NEXT_IF     = "Z:"
+    ADD_HITS          = "C:"
+    SUB_HITS          = "B:"
+    ADD_SOURCE        = "A:"
+    SUB_SOURCE        = "B:"
+    ADD_ADRESS        = "I:"
+    MEASURED          = "M:"
+    TRIGGER           = "T:"
+    AND_NEXT          = "N:"
+    OR_NETX           = "O:"
+    MEASURED_PRECENT  = "G:"
+    MEASURED_IF       = "Q:"
+    REMEMBER          = "K:"
