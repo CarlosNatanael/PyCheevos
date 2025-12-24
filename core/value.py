@@ -1,37 +1,42 @@
-from .constants import MemorySize
+from .constants import MemorySize, MemoryType
+from .condition import Condition
 
 class MemoryValue:
-    def __init__(self, address: int, size: MemorySize = MemorySize.BIT8):
+    def __init__(self, address: int, size: MemorySize = MemorySize.BIT8, mtype: MemoryType = MemoryType.MEM):
         self.address = address
         self.size = size
+        self.mtype = mtype
+
+    def prior(self):
+        return MemoryValue(self.address, self.size, MemoryType.PRIOR)
+    
+    def delta(self):
+        return MemoryValue(self.address, self.size, MemoryType.DELTA)
+    
+    def bcd(self):
+        return MemoryValue(self.address, self.size, MemoryType.BCD)
 
     def __eq__(self, other):
-        from .condition import Condition
         return Condition(self, "=", other)
     
     def __ne__(self, other):
-        from .condition import Condition
         return Condition(self, "!=", other)
     
     def __gt__(self, other):
-        from .condition import Condition
         return Condition(self, ">", other)
     
     def __ge__(self, other):
-        from .condition import Condition
         return Condition(self, ">=", other)
     
     def __lt__(self, other):
-        from .condition import Condition
         return Condition(self, "<", other)
     
     def __le__(self, other):
-        from .condition import Condition
         return Condition(self, "<=", other)
 
     def render(self) -> str:
         hex_addr = f"{self.address:04x}"
-        return f"0x{self.size.value}{hex_addr}"
+        return f"{self.mtype.value}0x{self.size.value}{hex_addr}"
     
 class ConstantValue:
     def __init__(self, value: int):

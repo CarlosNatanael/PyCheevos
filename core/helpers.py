@@ -14,3 +14,10 @@ def bit6(address: int) -> MemoryValue: return MemoryValue(address, MemorySize.BI
 def bit7(address: int) -> MemoryValue: return MemoryValue(address, MemorySize.BIT7)
 def low4(address: int) -> MemoryValue: return MemoryValue(address, MemorySize.LOWER4)
 def high4(address: int) -> MemoryValue: return MemoryValue(address, MemorySize.UPPER4)
+
+def prior(mem: MemoryValue) -> MemoryValue:
+    return mem.prior()
+def delta(mem: MemoryValue) -> MemoryValue:
+    return mem.delta()
+def bcd(mem: MemoryValue) -> MemoryValue:
+    return mem.bcd()
