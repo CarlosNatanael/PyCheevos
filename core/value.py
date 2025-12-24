@@ -2,8 +2,7 @@ from typing import List, Union
 from .constants import MemorySize, MemoryType, Flag
 
 class MemoryExpression:
-    def __init__(self, start_term): 
-        self.terms = [(start_term, Flag.ADD_SOURCE)]
+    def __init__(self, start_term): self.terms = [(start_term, Flag.ADD_SOURCE)]
 
     def __add__(self, other):
         self.terms.append((other, Flag.ADD_SOURCE))
