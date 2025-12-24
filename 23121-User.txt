@@ -1,3 +1,3 @@
 1.0
-Racing Game - Custom set
-1:"0xH07dd=7.1._R:0xH05c7<4":Puro Braço:Vença a corrida sem usar nenhuma gota de nitro::::PyCheevos:10:::::00000
+Racing game - No nitro
+1:"0xH07dd=7.1._R:0xH05c7<4:":Mestre da pista:Vença no circuito Italiano sem usar nitro::::PyCheevos:10:::::00000

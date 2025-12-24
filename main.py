@@ -3,29 +3,38 @@ from models.achievement import Achievement
 from core.helpers import byte
 from core.constants import Flag
 
-def condicoes_sem_nitro():
-
+def logica_sem_nitro():
     mem_nitro = byte(0x0005c7)
     mem_evento = byte(0x0007dd)
 
-    vitoria = (mem_evento == 0x07).with_hits(1)
+    mem_pista = byte(0x0013de)
 
-    reset_nitro = (mem_nitro < 0x04)
-    reset_nitro.flag = Flag.RESET_IF
+    reset_cond = (mem_nitro < 4)
+    reset_cond.flag = Flag.RESET_IF
 
-    return [vitoria, reset_nitro]
+    vitoria_cond = (mem_evento == 0x07).with_hits(1)
 
-meu_set = AchievementSet(game_id=23121, title="Racing Game - Custom set")
+    core = [vitoria_cond, reset_cond]
 
-conquista_nitro = Achievement (
-    title="Puro Braço",
-    description="Vença a corrida sem usar nenhuma gota de nitro",
+    alt_pista1 = [(mem_pista == 0x00)]
+    alt_pista2 = [(mem_pista == 0x01)]
+
+    return core, alt_pista1, alt_pista2
+
+meu_set = AchievementSet(game_id=23121, title="Racing game - No nitro")
+
+conquista = Achievement (
+    title="Mestre da pista",
+    description="Vença no circuito Italiano sem usar nitro",
     points=10,
     badge="00000"
 )
 
-conquista_nitro.add_conditions(condicoes_sem_nitro())
+l_core, l_pista1, l_pista2 = logica_sem_nitro()
 
-meu_set.add_achievement(conquista_nitro)
+conquista.add_core(l_core)
+conquista.add_alt(l_pista1)
+conquista.add_alt(l_pista2)
 
+meu_set.add_achievement(conquista)
 meu_set.save()
