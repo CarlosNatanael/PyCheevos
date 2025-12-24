@@ -6,41 +6,26 @@ class MemoryValue:
         self.size = size
         self.mtype = mtype
 
-    def prior(self):
-        return MemoryValue(self.address, self.size, MemoryType.PRIOR)
-    
-    def delta(self):
-        return MemoryValue(self.address, self.size, MemoryType.DELTA)
-    
-    def bcd(self):
-        return MemoryValue(self.address, self.size, MemoryType.BCD)
+    def prior(self): return MemoryValue(self.address, self.size, MemoryType.PRIOR)
+    def delta(self): return MemoryValue(self.address, self.size, MemoryType.DELTA)
+    def bcd(self):   return MemoryValue(self.address, self.size, MemoryType.BCD)
+    def invert(self):return MemoryValue(self.address, self.size, MemoryType.INVERT)
 
-    def __eq__(self, other):
+    def __eq__(self, other):return self._cond("=", other)
+    def __ne__(self, other):return self._cond("!=", other)
+    def __gt__(self, other):return self._cond(">", other)
+    def __ge__(self, other):return self._cond(">=", other)
+    def __lt__(self, other):return self._cond("<", other)
+    def __le__(self, other):return self._cond("<=", other)
+
+    def _cond(self, cmp, other):
         from .condition import Condition
-        return Condition(self, "=", other)
-    
-    def __ne__(self, other):
-        from .condition import Condition
-        return Condition(self, "!=", other)
-    
-    def __gt__(self, other):
-        from .condition import Condition
-        return Condition(self, ">", other)
-    
-    def __ge__(self, other):
-        from .condition import Condition
-        return Condition(self, ">=", other)
-    
-    def __lt__(self, other):
-        from .condition import Condition
-        return Condition(self, "<", other)
-    
-    def __le__(self, other):
-        from .condition import Condition
-        return Condition(self, "<=", other)
+        return Condition(self, cmp, other)
 
     def render(self) -> str:
         hex_addr = f"{self.address:04x}"
+        if self.size.value.startswith('f') or self.size.value == 'K':
+            return f"{self.mtype.value}{self.size.value}{hex_addr}"
         return f"{self.mtype.value}0x{self.size.value}{hex_addr}"
     
 class ConstantValue:
