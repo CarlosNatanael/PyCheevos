@@ -69,11 +69,19 @@ class MemoryValue:
         return Condition(self, cmp, other)
 
     def render(self) -> str:
+        if self.mtype == MemoryType.RECALL:
+            return "{recall}"
+
         hex_addr = f"{self.address:04x}"
+        
         if self.size.value.startswith('f') or self.size.value == 'K':
             return f"{self.mtype.value}{self.size.value}{hex_addr}"
+        
         return f"{self.mtype.value}0x{self.size.value}{hex_addr}"
-    
+
+class RecallValue(MemoryValue):
+    def __init__(self):
+        super().__init__(0, MemorySize.BIT8, MemoryType.RECALL)
 class ConstantValue:
     def __init__(self, value: int):
         self.value = value
