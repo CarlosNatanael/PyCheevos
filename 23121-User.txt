@@ -1,3 +1,3 @@
 1.0
 Racing game - No nitro
-1:"0xH009e=0.1._0xH13de=14_0xH07d9=0_T:0xH07dd=7_d0xH07dd=13SR:0xH0076>0":Dano Teste:Vença no circuito Monaco sem nenhum dano::::PyCheevos:25:::::00000
+1:"A:0xH0010_0xH0020>50":Dano Teste:Vença no circuito Monaco sem nenhum dano::::PyCheevos:25:::::00000
