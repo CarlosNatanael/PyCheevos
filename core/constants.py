@@ -1,22 +1,27 @@
 from enum import Enum
 class MemorySize(Enum):
-    BIT0        =   "M" # 0xM
-    BIT1        =   "N" # 0xN   
-    BIT2        =   "O" # 0xO
-    BIT3        =   "P" # 0xP
-    BIT4        =   "Q" # 0xQ
-    BIT5        =   "R" # 0xR
-    BIT6        =   "S" # 0xS
-    BIT7        =   "T" # 0xT
-    BIT8        =   "H" # 0xH
-    BIT16       =   " " # 0x (Sem letra é 16-bit)
-    BIT24       =   "W" # 0xW
-    BIT32       =   "X" # 0xX
-    BIT16_RE    =   "I" # Big Endian
+    BIT0        =   "M"
+    BIT1        =   "N"   
+    BIT2        =   "O"
+    BIT3        =   "P"
+    BIT4        =   "Q"
+    BIT5        =   "R"
+    BIT6        =   "S"
+    BIT7        =   "T"
+    BIT8        =   "H"
+    BIT16       =   " "  
+    BIT24       =   "W"
+    BIT32       =   "X"
+    BIT16_RE    =   "I"
     BIT24_RE    =   "J" 
     BIT32_RE    =   "G" 
-    LOWER4      =   "L" # 0xL
-    UPPER4      =   "U" # 0xU
+    LOWER4      =   "L"
+    UPPER4      =   "U"
+    BITCOUNT    =   "K"  
+    FLOAT       =   "fF"  
+    FLOAT_BE    =   "fB"  
+    MBF32       =   "fM"  
+    MBF32_LE    =   "fL"  
 
 class MemoryType(Enum):
     MEM     = ""
