@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from .achievement import Achievement
 
 class AchievementSet:
@@ -11,7 +11,7 @@ class AchievementSet:
         self.achievements.append(achievement)
         return self
 
-    def save(self, path: str = None):
+    def save(self, path: Optional[str] = None):
         """Gera o ficheiro User.txt para o emulador"""
         filename = path if path else f"{self.game_id}-User.txt"
         

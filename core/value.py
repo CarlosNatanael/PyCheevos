@@ -30,9 +30,9 @@ class MemoryExpression:
             conditions.append(Condition(last_val, cmp=cmp, rvalue=rvalue))
 
         return conditions
-    
-    def __eq__(self, other): return self._build_conditions("=", other)
-    def __ne__(self, other): return self._build_conditions("!=", other)
+
+    def __eq__(self, other): return self._build_conditions("=", other) # type: ignore[override]
+    def __ne__(self, other): return self._build_conditions("!=", other) # type: ignore[override]
     def __gt__(self, other): return self._build_conditions(">", other)
     def __ge__(self, other): return self._build_conditions(">=", other)
     def __lt__(self, other): return self._build_conditions("<", other)
@@ -57,8 +57,8 @@ class MemoryValue:
     def bcd(self):   return MemoryValue(self.address, self.size, MemoryType.BCD)
     def invert(self):return MemoryValue(self.address, self.size, MemoryType.INVERT)
 
-    def __eq__(self, other):return self._cond("=", other)
-    def __ne__(self, other):return self._cond("!=", other)
+    def __eq__(self, other):return self._cond("=", other) # type: ignore[override]
+    def __ne__(self, other):return self._cond("!=", other) # type: ignore[override]
     def __gt__(self, other):return self._cond(">", other)
     def __ge__(self, other):return self._cond(">=", other)
     def __lt__(self, other):return self._cond("<", other)

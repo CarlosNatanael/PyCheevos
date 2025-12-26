@@ -1,13 +1,13 @@
 from .constants import Flag
 from .value import MemoryValue, ConstantValue
-from typing import Union
+from typing import Union, Optional
 
 class Condition:
     def __init__(
             self,
             lvalue: Union[MemoryValue, ConstantValue, int],
             cmp: str = "=",
-            rvalue: Union[MemoryValue, ConstantValue, int] = None,
+            rvalue: Optional[Union[MemoryValue, ConstantValue, int]] = None,
             flag: Flag = Flag.NONE,
             hits: int = 0
     ):
