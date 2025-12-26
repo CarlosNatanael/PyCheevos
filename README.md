@@ -1,2 +1,2 @@
 # PyCheevos
-Conjunto de ferramentas para lidar com conjuntos de conquistas do RetroAchievements usando Python
+Toolset for handling RetroAchievements achievement sets using Python
