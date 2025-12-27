@@ -50,6 +50,7 @@ class Flag(Enum):
     MEASURED_PERCENT  = "G:"
     MEASURED_IF       = "Q:"
     REMEMBER          = "K:"
+
 class LeaderboardFormat(Enum):
     SCORE           = "SCORE"
     FRAMES          = "FRAMES"
@@ -71,3 +72,22 @@ class LeaderboardFormat(Enum):
     FLOAT4          = "FLOAT4"
     FLOAT5          = "FLOAT5"
     FLOAT6          = "FLOAT6"
+
+
+# EXPORTING FLAGS FOR DIRECT ACCESS
+NONE              = Flag.NONE
+PAUSE_IF          = Flag.PAUSE_IF
+RESET_IF          = Flag.RESET_IF
+RESET_NEXT_IF     = Flag.RESET_NEXT_IF
+ADD_HITS          = Flag.ADD_HITS
+SUB_HITS          = Flag.SUB_HITS
+ADD_SOURCE        = Flag.ADD_SOURCE
+SUB_SOURCE        = Flag.SUB_SOURCE
+ADD_ADDRESS       = Flag.ADD_ADDRESS
+MEASURED          = Flag.MEASURED
+TRIGGER           = Flag.TRIGGER
+AND_NEXT          = Flag.AND_NEXT
+OR_NEXT           = Flag.OR_NEXT
+MEASURED_PERCENT  = Flag.MEASURED_PERCENT
+MEASURED_IF       = Flag.MEASURED_IF
+REMEMBER          = Flag.REMEMBER
