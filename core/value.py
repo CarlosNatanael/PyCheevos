@@ -44,6 +44,10 @@ class MemoryValue:
         self.size = size
         self.mtype = mtype
 
+    def __mul__(self, other):
+        from .condition import Condition
+        return Condition(self, "*", other)
+
     def __add__(self, other):
         expr = MemoryExpression(self)
         return expr + other
