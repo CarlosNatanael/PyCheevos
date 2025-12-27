@@ -1,5 +1,11 @@
 from typing import List, Union
 from .constants import MemorySize, MemoryType, Flag
+class ConditionList(list):
+    """Uma lista de condições que suporta métodos fluentes como .with_hits()"""
+    def with_hits(self, hits: int):
+        if self:
+            self[-1].hits = hits
+        return self
 
 class MemoryExpression:
     def __init__(self, start_term, start_flag=Flag.ADD_SOURCE): 
@@ -36,7 +42,7 @@ class MemoryExpression:
     def prior(self): return self._apply_modifier("prior")
     def bcd(self):   return self._apply_modifier("bcd")
 
-    def _build_conditions(self, cmp: str, rvalue) -> List:
+    def _build_conditions(self, cmp: str, rvalue) -> ConditionList:
         from .condition import Condition
         from .value import ConstantValue
 
@@ -54,7 +60,7 @@ class MemoryExpression:
         else:
             conditions.append(Condition(last_val, cmp=cmp, rvalue=rvalue))
 
-        return conditions
+        return ConditionList(conditions)
     
     def __eq__(self, other): return self._build_conditions("=", other) # type: ignore[override]
     def __ne__(self, other): return self._build_conditions("!=", other) # type: ignore[override]
