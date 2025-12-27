@@ -31,7 +31,7 @@ Located in `core.helpers`, these functions are the primary way to define memory 
 |`byte(addr)`| 8-bit| `0xh...`|`byte(0x100)`|
 |`word(addr)`| 16-bit|`0x ...`|`word(0x100)`|
 |`dword(addr)`| 32-bit|`0xX...`|`dword(0x100)`|
-|
+
 #### **Bits & Nibbles**
 
 |function | Description | RA Syntax|
@@ -39,7 +39,7 @@ Located in `core.helpers`, these functions are the primary way to define memory 
 |`bit0(addr)`...`bit7(addr)`|Single Bit access| `0xM...` to `0xT...`|
 |`lower(addr)`|Lower 4 bits (Nibble)| `0xL...`|
 |`high4(addr)`|Upper 4 bits (Nibble)| `0xU...`|
-|
+
 
 #### **Floating Point**
 
@@ -49,7 +49,7 @@ Located in `core.helpers`, these functions are the primary way to define memory 
 |`float32be(addr)`|32-bit Float (Big Endian)|`fB...`
 |`double32(addr)`|32-bit Double|`fH...`
 |`mbf32(addr)`|Microsoft Binary Format|`fM...`
-|
+
 
 #### **Usage Example**:
 ```python
@@ -130,7 +130,7 @@ You can perform bitwise logic between memory addresses or constants.
 |`*`|	Multiply	|`*`|
 |`/`|	Divide	|`/`|
 |`%`|	Modulo	|`%`|
-|
+
 
 ```python
 flags = byte(0x5000)
