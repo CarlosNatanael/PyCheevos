@@ -12,9 +12,9 @@ class RichPresence:
         self.lookups[name] = value
         return self
     
-    def add_display(self, condition: str, text: str):
+    def add_display(self, condition: Union[str, Condition], text: str):
         if hasattr(condition, 'render'):
-            cond_str = condition.render()
+            cond_str = condition.render() # type: ignore
         else:
             cond_str = str(condition)
             
