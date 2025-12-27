@@ -4,9 +4,9 @@
 
 Inspired by **RATools** and **Cruncheevos**, it allows you to leverage the full power of the Python ecosystem (loops, functions, classes) to build complex achievement logic with clean, readable code.
 
-- **Core**: Handles condition parsing, memory addresses, and arithmetic logic (`byte`, `word`, `delta`, `prior`).
+- **[Core](https://github.com/CarlosNatanael/PyCheevos/blob/main/core)**: Handles condition parsing, memory addresses, and arithmetic logic (`byte`, `word`, `delta`, `prior`).
 
-- **Models**: Provides the structure for Sets, Achievements, Leaderboards, and Rich Presence.
+- **[Models](https://github.com/CarlosNatanael/PyCheevos/blob/main/models)**: Provides the structure for Sets, Achievements, Leaderboards, and Rich Presence.
 
 ### Usage
 Using this library assumes familiarity with the [RetroAchievements](https://docs.retroachievements.org) workflow and memory inspection.
