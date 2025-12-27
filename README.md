@@ -58,5 +58,3 @@ You are welcome to ***request features***. When doing so, please show how you wo
 The core library aims to be minimal. Complex logic specific to a single game should ideally be implemented in your own script using Python's flexibility, rather than hardcoded into the library core.
 
 ***Pull Requests*** are welcome, especially for documentation improvements or type hinting fixes.
-
-#
