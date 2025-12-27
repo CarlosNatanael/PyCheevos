@@ -1,60 +1,38 @@
 from models.set import AchievementSet
-from models.leaderboard import Leaderboard
-from core.condition import Condition
-from core.helpers import byte, dword
-from core.constants import Flag, LeaderboardFormat
+from models.rich_presence import RichPresence
+from core.helpers import byte, recall
+from core.constants import Flag
 
-# Mapeamento
-mem_lap = byte(0x0000a9)
-mem_temp_m = byte(0x0000ad)
-mem_temp_s = byte(0x0000ae)
-mem_temp_cs = byte(0x0000b0)
+mem_pista_id = byte(0x0013de)
+mem_estado   = byte(0x00009e)
+mem_volta    = byte(0x0000a9)
+mem_dano     = byte(0x000076)
 
-cond_delta = (mem_lap.delta() == 3)
+mem_min = byte(0x0000ad)
+mem_seg = byte(0x0000ae)
+mem_cen = byte(0x0000b0)
 
-cond_min = (mem_temp_m.bcd() * 6000)
-cond_min.flag = Flag.ADD_SOURCE
+rp = RichPresence()
+rp.add_lookup("NomePista", {
+    0: "Treino",
+    13: "Brasil",
+    14: "Mônaco",
+    15: "Itália",
+})
 
-cond_sec = (mem_temp_s.bcd() * 100)
-cond_sec.flag = Flag.ADD_SOURCE
-
-cond_ces = Condition(mem_temp_cs.bcd()) 
-cond_ces.flag = Flag.MEASURED
-
-meu_set = AchievementSet(game_id=23121, title="Racing game - Leaderboard")
-
-lb = Leaderboard(
-    title="Tempo total - Italia",
-    description="Melhor tempo na Italia",
-    id=11100001,
-    format=LeaderboardFormat.MILLISECS,
-    lower_is_better=True
+rp.add_display(
+    condition=(mem_estado != 0), 
+    text="No Menu Principal 🚗"
 )
 
-start_cond = [
-    (byte(0x0007dd) == 13),
-    (byte(0x0013de) == 0),
-    (byte(0x0000a9) == 4),
-    (cond_delta)
-]
+texto_corrida = (
+    f"{rp.lookup('NomePista', mem_pista_id)} "
+    f"• Volta {rp.value(mem_volta)} "
+    f"• {rp.value(mem_min)}:{rp.value(mem_seg, 'SECS')}.{rp.value(mem_cen)} "
+    f"• Dano: {rp.value(mem_dano)}"
+)
 
-cancel_cond = [
-    Condition(0, "=", 1)
-]
-
-submit_cond = [
-    Condition(0, "=", 1)
-]
-value_cond = [
-    cond_min,
-    cond_sec,
-    cond_ces
-]
-
-lb.set_start(start_cond)
-lb.set_cancel(cancel_cond)
-lb.set_submit(submit_cond)
-lb.set_value(value_cond)
-
-meu_set.add_leaderboard(lb)
+rp.add_display(condition="True", text=texto_corrida)
+meu_set = AchievementSet(game_id=23121, title="Racing Game - Final Set")
+meu_set.add_rich_presence(rp)
 meu_set.save()
