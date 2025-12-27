@@ -2,7 +2,8 @@ from typing import List, Union
 from .constants import MemorySize, MemoryType, Flag
 
 class MemoryExpression:
-    def __init__(self, start_term): self.terms = [(start_term, Flag.ADD_SOURCE)]
+    def __init__(self, start_term, start_flag=Flag.ADD_SOURCE): 
+        self.terms = [(start_term, start_flag)]
 
     def __add__(self, other):
         self.terms.append((other, Flag.ADD_SOURCE))
@@ -11,6 +12,29 @@ class MemoryExpression:
     def __sub__(self, other):
         self.terms.append((other, Flag.SUB_SOURCE))
         return self
+    
+    def __rshift__(self, other):
+        last_term, _ = self.terms.pop()
+        self.terms.append((last_term, Flag.ADD_ADDRESS))
+        self.terms.append((other, Flag.ADD_SOURCE))
+        return self
+
+    def _apply_modifier(self, method_name):
+        new_expr = MemoryExpression(self.terms[0][0], self.terms[0][1])
+        new_expr.terms = self.terms[:-1]
+        
+        last_val, last_flag = self.terms[-1]
+        if hasattr(last_val, method_name):
+            new_val = getattr(last_val, method_name)()
+            new_expr.terms.append((new_val, last_flag))
+        else:
+            new_expr.terms.append((last_val, last_flag))
+            
+        return new_expr
+
+    def delta(self): return self._apply_modifier("delta")
+    def prior(self): return self._apply_modifier("prior")
+    def bcd(self):   return self._apply_modifier("bcd")
 
     def _build_conditions(self, cmp: str, rvalue) -> List:
         from .condition import Condition
@@ -23,6 +47,7 @@ class MemoryExpression:
             conditions.append(Condition(val, flag=flag))
 
         last_val, last_flag = self.terms[-1]
+        
         if last_flag == Flag.SUB_SOURCE:
             conditions.append(Condition(last_val, flag=Flag.SUB_SOURCE))
             conditions.append(Condition(ConstantValue(0), cmp, rvalue))
@@ -30,7 +55,7 @@ class MemoryExpression:
             conditions.append(Condition(last_val, cmp=cmp, rvalue=rvalue))
 
         return conditions
-
+    
     def __eq__(self, other): return self._build_conditions("=", other) # type: ignore[override]
     def __ne__(self, other): return self._build_conditions("!=", other) # type: ignore[override]
     def __gt__(self, other): return self._build_conditions(">", other)
@@ -43,6 +68,11 @@ class MemoryValue:
         self.address = address
         self.size = size
         self.mtype = mtype
+
+    def __rshift__(self, other):
+        expr = MemoryExpression(self, start_flag=Flag.ADD_ADDRESS)
+        expr.terms.append((other, Flag.ADD_SOURCE))
+        return expr
 
     def __mul__(self, other):
         from .condition import Condition
