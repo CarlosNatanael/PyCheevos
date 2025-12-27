@@ -47,11 +47,11 @@ class AchievementSet:
             for lb in self.leaderboards:
                 f.write(lb.render() + "\n")
         
-        print(f"✅ Generated User file: {user_file}")
+        print(f"Generated User file: {user_file}")
 
         if self.rich_presence:
             rp_file = output / f"{self.game_id}-Rich.txt"
             with open(rp_file, "w", encoding="utf-8") as f:
                 f.write(self.rich_presence.render())
             
-            print(f"✅ Generated Rich Presence file: {rp_file}")
+            print(f"Generated Rich Presence file: {rp_file}")
