@@ -1,10 +1,15 @@
 from typing import List, Union
 from .constants import MemorySize, MemoryType, Flag
+
 class ConditionList(list):
-    """Uma lista de condições que suporta métodos fluentes como .with_hits()"""
     def with_hits(self, hits: int):
         if self:
             self[-1].hits = hits
+        return self
+
+    def with_flag(self, flag: Flag):
+        if self:
+            self[-1].flag = flag
         return self
 
 class MemoryExpression:

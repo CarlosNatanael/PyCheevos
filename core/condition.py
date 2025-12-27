@@ -24,6 +24,10 @@ class Condition:
         self.hits = hits
         return self
 
+    def with_flag(self, flag: Flag):
+        self.flag = flag
+        return self
+
     def render(self) -> str:
         parts = [self.flag.value]
         parts.append(self.lvalue.render())
