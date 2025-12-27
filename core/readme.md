@@ -64,16 +64,17 @@ is_active = bit0(0x00F0)
 
 These functions transform how the emulator reads a value relative to the previous frame.
 
-`prior(memory)`
-
-Returns the value the memory had in the **previous frame**.
-- **Use case**: Detecting changes or strictly increasing values.
-- **Example**: `coins > prior(coins)` (Coins increased).
-
 `delta(memory)`
 
-Similar to `prior`, but strictly used for change detection logic in [RAIntegration](https://github.com/RetroAchievements/RAIntegration/).
-- **Use case**: `level_id != delta(level_id)` (Level ID changed).
+Returns the value the memory had in the **previous frame**.
+- **Use case**: Checking for the exact frame a value changes such as a level ID changing from level 1 to level 2.
+- **Example**: `level_id != delta(level_id)` (Level ID changed).
+
+`prior(memory)`
+
+Returns the previous value of the address **regardless of the number of frames since changing value**.
+- **Use case**: Checking that a user accessed a level through the proper means and not through a password on the main menu.
+- **Example**: `prior(level_id != 0)`
 
 `bcd(memory)`
 
