@@ -1,0 +1,9 @@
+Lookup:NomePista
+0=Treino
+13=Brasil
+14=Mônaco
+15=Itália
+
+Display:
+?0xH009e!=0?No Menu Principal 🚗
+@NomePista(0x13de) • Volta @VALUE(0xa9) • @VALUE(0xad):@SECS(0xae).@VALUE(0xb0) • Dano: @VALUE(0x76)
