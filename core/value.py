@@ -48,6 +48,22 @@ class MemoryValue:
         from .condition import Condition
         return Condition(self, "*", other)
 
+    def __truediv__(self, other):
+        from .condition import Condition
+        return Condition(self, "/", other)
+
+    def __mod__(self, other):
+        from .condition import Condition
+        return Condition(self, "%", other)
+
+    def __and__(self, other):
+        from .condition import Condition
+        return Condition(self, "&", other)
+    
+    def __xor__(self, other):
+        from .condition import Condition
+        return Condition(self, "^", other)
+
     def __add__(self, other):
         expr = MemoryExpression(self)
         return expr + other
