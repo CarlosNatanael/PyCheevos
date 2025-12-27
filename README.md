@@ -1,114 +1,62 @@
-# PyCheevos 🏆
+# PyCheevos
 
-A Python library for generating RetroAchievements achievement sets programmatically.
-Inspired by **RATools** and **Cruncheevos**, but focused on the simplicity and power of the Python ecosystem.
+**PyCheevos** is a set of tools to generate [RetroAchievements](https://retroachievements.org/) achievement sets programmatically using Python.
 
-## 🚀 Getting Started
+Inspired by **RATools** and **Cruncheevos**, it allows you to leverage the full power of the Python ecosystem (loops, functions, classes) to build complex achievement logic with clean, readable code.
 
-1.  Clone this repository.
-2.  Create a Python script (e.g., `my_game.py`) in the root directory.
-3.  Import the modules and start coding!
+- **Core**: Handles condition parsing, memory addresses, and arithmetic logic (`byte`, `word`, `delta`, `prior`).
 
-## 🛠️ Quick Guide
+- **Models**: Provides the structure for Sets, Achievements, Leaderboards, and Rich Presence.
 
-### 1. Memory Access
-Use *helpers* to define memory addresses. You don't need to worry about hexadecimal prefixes (`0xH`, `0x `, `0xX`); the library handles them for you.
+### Usage
+Using this library assumes familiarity with the [RetroAchievements](https://docs.retroachievements.org) workflow and memory inspection.
 
-```python
-from core.helpers import byte, word, dword, bit0, float32
-
-# Definitions
-coins  = byte(0x1234)        # 8-bit
-time   = word(0x5678)        # 16-bit
-score  = dword(0x9ABC)       # 32-bit
-flag   = bit0(0x0001)        # Specific Bit
-pos_x  = float32(0x3333)     # Float 32-bit
-```
-### 2. Modifiers (Delta, Prior, BCD)
-Chain methods or use helpers to access previous values or changes.
-
-```python
-from core.helpers import delta, prior, bcd
-
-# Example: If coins increased
-earned_coin = (coins > prior(coins))
-
-# Example: If value changed (Delta)
-value_changed = (time != delta(time))
-```
-### 3. Creating Achievements
-Achievements support Core (Required) and Alts (OR Logic) groups.
-
-```python
+#### Small Demo
+``` Python
 from models.set import AchievementSet
 from models.achievement import Achievement
+from core.helpers import byte, prior
 
-# Initialize the Set
-my_set = AchievementSet(game_id=1111, title="My Game")
+# Initialize the set
+game_set = AchievementSet(game_id=1, title="Sonic the Hedgehog")
 
-# Define the Achievement
-ach = Achievement("Collector", "Collect 100 coins", points=5)
+# Define Memory Addresses
+mem_rings = byte(0xFE20)
+mem_zone  = byte(0xFE10)
 
-# Logic: Coins >= 100 AND Prev Coins < 100
-logic = [
-    (coins >= 100),
-    (prior(coins) < 100)
-]
+# Reusable Logic Function
+def got_rings(amount):
+    """Triggers when ring count increases to or past 'amount'."""
+    return [
+        mem_rings >= amount,       # Current rings >= amount
+        prior(mem_rings) < amount  # Previous rings < amount
+    ]
 
-ach.add_core(logic)
-my_set.add_achievement(ach)
-```
-
-### 4. Memory Arithmetic
-Complex additions and subtractions (AddSource, SubSource) are handled naturally.
-
-```python
-# A + B > 50
-condition = (byte(0x10) + byte(0x20) > 50)
-```
-
-### 5. Leaderboards
-Full support for Start, Cancel, Submit, and Value conditions.
-
-```python
-from models.leaderboard import Leaderboard
-from core.constants import LeaderboardFormat
-
-lb = Leaderboard(
-    title="Time Attack",
-    description="Finish fast",
-    format=LeaderboardFormat.MILLISECS,
-    lower_is_better=True
+# Create Achievement
+ach = Achievement(
+    title="Super Ring Collector", 
+    description="Collect 1000 rings", 
+    points=50, 
+    id=111001
 )
 
-lb.set_start(byte(0x99) == 1)       # Race started
-lb.set_cancel(byte(0x99) == 0)      # Left race
-lb.set_submit(byte(0xAA) == 1)      # Finished
-lb.set_value(dword(0xBB))           # Time value
+# Apply Logic
+ach.add_core(got_rings(1000))
+ach.add_condition(mem_zone == 0) # Extra condition: Must be in Green Hill
 
-my_set.add_leaderboard(lb)
-```
-### 6. Rich Presence
+game_set.add_achievement(ach)
 
-Create dynamic statuses for Discord and the RA website.
-
-```python
-from models.rich_presence import RichPresence
-
-rp = RichPresence()
-rp.add_lookup("Levels", {0: "Menu", 1: "Forest"})
-
-# Conditional Display
-rp.add_display(byte(0x10) == 0, "In Menu")
-rp.add_display("True", "Level: @Levels(0x10) | Lives: @VALUE(0x12)")
-
-my_set.add_rich_presence(rp)
+# Generate the user file (1-User.txt)
+game_set.save()
 ```
 
-### 7. Generating the File
-Finally, save the file to your emulator's folder `(RACache/Data)`.
+### Contributing
+You are welcome to ***report issues***. If you run into errors generating the script, please include your Python version and the traceback.
 
-```python
-my_set.save() 
-# Generates: 1111-User.txt and 1111-Rich.txt
-```
+You are welcome to ***request features***. When doing so, please show how you would use the feature (pseudo-code) and what logic problem it solves.
+
+The core library aims to be minimal. Complex logic specific to a single game should ideally be implemented in your own script using Python's flexibility, rather than hardcoded into the library core.
+
+***Pull Requests*** are welcome, especially for documentation improvements or type hinting fixes.
+
+#

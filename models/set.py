@@ -26,8 +26,8 @@ class AchievementSet:
 
     def save(self, path: Optional[str] = None):
         """
-        Gera os arquivos User.txt e Rich.txt.
-        Se path não for informado, salva em: /output/Titulo - ID/
+        Generates the User.txt and Rich.txt files.
+        If the path is not specified, it saves to: /output/Title - ID/
         """
         if path is None:
             root = Path(__file__).resolve().parent.parent
