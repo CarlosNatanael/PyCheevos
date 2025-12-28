@@ -36,7 +36,7 @@ game_set = AchievementSet(game_id=12345, title="My Awesome Game")
 - `add_leaderboard(leaderboard)`: Registers a leaderboard object.
 - `add_rich_presence(rp)`: Registers the Rich Presence object.
 - `save(path=None)`: Exports `[ID]-User.txt` and `[ID]-Rich.txt`.
-    - If `path` is not provided, defaults to an `output/` folder in the project root.
+    - If `path` is not provided, defaults to an `output/` folder next to the script file.
 #
 
 ### 2. **Achievement**
@@ -152,10 +152,10 @@ def damage_car():
     
     # 2. Track & Rank requirements
     circuit_monaco = (mem_circuit == 14)
-    cond_frist = (mem_position == 0)
+    cond_first = (mem_position == 0)
 
     # 3. Trigger: Event changed to 7 (Victory)
-    vitory_cond = (mem_event == 7)
+    victory_cond = (mem_event == 7)
     vitorycond.flag = Flag.TRIGGER
 
     # 4. Delta Check: Event was 13 previously
@@ -164,8 +164,8 @@ def damage_car():
     core = [
         cond_start,
         circuit_monaco,
-        cond_frist,
-        vitory_cond,
+        cond_first,
+        victory_cond,
         delta_circuit
     ]
 
@@ -180,7 +180,7 @@ def damage_car():
 # Setup
 my_set = AchievementSet(game_id=23121, title="Racing game")
 
-cheevos = Achievement(
+monaco_damageless = Achievement(
     title="Untouchable",
     description="Win a race at the Monaco circuit with zero damage to your car",
     points=25,
@@ -189,10 +189,10 @@ cheevos = Achievement(
 
 l_core, l_alt1 = damage_car()
 
-conquista.add_core(l_core)
-conquista.add_alt(l_alt1) # Adds Reset logic as an Alternate Group
+monaco_damageless.add_core(l_core)
+monaco_damageless.add_alt(l_alt1) # Adds Reset logic as an Alternate Group
 
-my_set.add_achievement(conquista)
+my_set.add_achievement(monaco_damageless)
 # my_set.save()
 ```
 
@@ -206,9 +206,9 @@ This is the string written to `23121-User.txt`:
 
 |python|Generated|Meaning|
 |------|---------|-------|
-|`(mem_greem == 0).with_hits(1)`|`0xH00009e=0.1.`|Addr 0x9e must be 0 (Hit Count: 1).
+|`(mem_green == 0).with_hits(1)`|`0xH00009e=0.1.`|Addr 0x9e must be 0 (Hit Count: 1).
 |`mem_circuit == 14`|`0xH0013de=14`|Track ID must be 14 (Monaco).|
-|`vitory_cond` (Flag.TRIGGER)|`T:0xH0007dd=7`|Trigger icon when Event is 7.|
+|`victory_cond` (Flag.TRIGGER)|`T:0xH0007dd=7`|Trigger icon when Event is 7.|
 |`mem_event.delta() == 13`|`d0xH0007dd=13`|Previous Event value must be 13.
 |`add_alt(...)`|`S`|Separator for Alternate Group.
 |`cond_reset` (Flag.RESET_IF)|`R:0xH000076>0`|Reset if Damage is > 0.
