@@ -199,7 +199,7 @@ my_set.add_achievement(conquista)
 #### **The Generated Output**
 This is the string written to `23121-User.txt`:
 ```plaintext
-1:"0xH00009e=0.1._0xH0013de=14_0xH0007d9=0_T:0xH0007dd=7_d0xH0007dd=13SR:0xH000076>0":Dano Teste:Vença no circuito Monaco sem nenhum dano::::PyCheevos:25:::::00000
+1:"0xH00009e=0.1._0xH0013de=14_0xH0007d9=0_T:0xH0007dd=7_d0xH0007dd=13SR:0xH000076>0":Untouchable:Win a race at the Monaco circuit with zero damage to your car::::PyCheevos:25:::::00000
 ```
 
 #### **Decoding the String**
