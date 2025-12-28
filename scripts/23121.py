@@ -18,8 +18,7 @@ def damage_car():
     cond_first = (mem_position == 0)
 
     # 3. Trigger: Event changed to 7 (Victory)
-    victory_cond = (mem_event == 7)
-    victory_cond.with_flag(trigger)
+    victory_cond = (mem_event == 7).with_flag(trigger)
 
     # 4. Delta Check: Event was 13 previously
     delta_circuit = (mem_event.delta() == 13)
@@ -33,8 +32,7 @@ def damage_car():
     ]
 
     # 5. Reset: If Damage > 0
-    cond_reset = (mem_damage > 0)
-    cond_reset.with_flag(reset_if)
+    cond_reset = (mem_damage > 0).with_flag(reset_if)
 
     alt_damage = [cond_reset]
 
@@ -56,3 +54,4 @@ monaco_damageless.add_core(l_core)
 monaco_damageless.add_alt(l_alt1)
 
 my_set.add_achievement(monaco_damageless)
+my_set.save()

@@ -74,9 +74,9 @@ class LeaderboardFormat(Enum):
     FLOAT6          = "FLOAT6"
 
 
-# =======================================================================
+
 # EXPORTING FLAGS (UPPERCASE - Constants Style)
-# =======================================================================
+
 NONE              = Flag.NONE
 PAUSE_IF          = Flag.PAUSE_IF
 RESET_IF          = Flag.RESET_IF
@@ -94,10 +94,9 @@ MEASURED_PERCENT  = Flag.MEASURED_PERCENT
 MEASURED_IF       = Flag.MEASURED_IF
 REMEMBER          = Flag.REMEMBER
 
-# =======================================================================
+
 # EXPORTING FLAGS (LOWERCASE - Pythonic Style)
-# Adicionado para permitir: .with_flag(add_source)
-# =======================================================================
+
 pause_if          = Flag.PAUSE_IF
 reset_if          = Flag.RESET_IF
 reset_next_if     = Flag.RESET_NEXT_IF
