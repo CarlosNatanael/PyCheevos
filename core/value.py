@@ -79,6 +79,10 @@ class MemoryValue:
         self.address = address
         self.size = size
         self.mtype = mtype
+    
+    @property
+    def raw_address(self) -> int:
+        return self.address
 
     def __rshift__(self, other):
         expr = MemoryExpression(self, start_flag=Flag.ADD_ADDRESS)
