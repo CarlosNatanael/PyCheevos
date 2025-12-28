@@ -16,10 +16,10 @@ The **Models** module defines the structural components of a RetroAchievements s
     - [Initialization](#initialization-3)
     - [Lookups](#lookups)
     - [Display](#displays)
-5. [Game Objects](#5-game-objects-poo)
+5. [Game Objects](#5-game-objects-oop)
     - [Definig a Class](#defining-a-class)
     - [Static vs Dynamic](#usage-static-vs-dynamic)
-6. [How it works](#5-under-the-hood-how-it-works)
+6. [How it works](#6-under-the-hood-how-it-works)
     - [The code](#the-code)
 
 ### 1. **AchievementSet**
@@ -129,7 +129,7 @@ The **Display** string is evaluated top-to-bottom. The first condition that eval
 
 #
 
-### 5. **Game Objects (POO)**
+### 5. **Game Objects (OOP)**
 You can create reusable classes for game entities (like Player, Enemy, Inventory) using the `GameObject` base class. This allows you to define memory offsets once and reuse them for both static memory addresses and dynamic pointers.
 
 #### **Defining a Class**
@@ -254,4 +254,5 @@ This is the string written to `23121-User.txt`:
 |`mem_event.delta() == 13`|`d0xH0007dd=13`|Previous Event value must be 13.
 |`add_alt(...)`|`S`|Separator for Alternate Group.
 |`cond_reset` (Flag.RESET_IF)|`R:0xH000076>0`|Reset if Damage is > 0.
+
 

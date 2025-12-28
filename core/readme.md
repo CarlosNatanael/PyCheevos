@@ -7,16 +7,17 @@ While `models` (Achievement, Set) handle the "structure", `core` handles the "lo
 ### Table of Contents
 
 1. [Memory Helpers](#1-memory-helpers)
+    - [Accessing Raw Address](#accessing-raw-address)
     - [Standard Sizes](#standard-sizes)
     - [Bits & Nibbles](#bits--nibbles)
     - [Floating Point](#floating-point)
-2. [Value Modifiers](#2-value-modifiers)
-3. [Arithmetic & Pointers](#3-arithmetic--pointers)
+3. [Value Modifiers](#2-value-modifiers)
+4. [Arithmetic & Pointers](#3-arithmetic--pointers)
     - [Basic Math](#basic-math)
     - [Pointer Chains](#pointer-chains-)
-4. [Bitwise Operations](#4-bitwise-operations)
-5. [Conditions & Flags](#5-conditions--flags)
-6. [Remember & Recall](#6-remember--recall)
+5. [Bitwise Operations](#4-bitwise-operations)
+6. [Conditions & Flags](#5-conditions--flags)
+7. [Remember & Recall](#6-remember--recall)
 
 #
 
