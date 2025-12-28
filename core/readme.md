@@ -24,6 +24,15 @@ While `models` (Achievement, Set) handle the "structure", `core` handles the "lo
 
 Located in `core.helpers`, these functions are the primary way to define memory addresses. You generally do not need to import `MemoryValue` directly.
 
+#### **Accessing Raw Address**
+Sometimes you may need the integer value of the address back (e.g., for meta-programming or loops). You can use the `.raw_address` property on static memory objects.
+
+```python
+mem = byte(0x1234)
+print(mem.raw_address)  # Output: 4660 (0x1234)
+```
+**Note**: Accessing `.raw_address` on a pointer chain or complex expression (like `base >> offset`) will raise an error, as those do not have a single static address.
+
 #### **Standard Sizes**
 
 |function | size | RA Syntax | Example|
@@ -59,7 +68,7 @@ level_id = byte(0x00A1)
 timer    = word(0x00B0)
 is_active = bit0(0x00F0)
 ```
-
+#
 ### 2. **Value Modifiers**
 
 These functions transform how the emulator reads a value relative to the previous frame.
@@ -97,6 +106,7 @@ lost_life = lives < prior(lives)
 # Compare BCD value
 has_10_lives = bcd(lives) == 10
 ```
+#
 
 ### 3. Arithmetic & Pointers
 The `MemoryValue` objects support standard Python math operators. These are compiled into `AddSource` and `SubSource` chains.
@@ -121,6 +131,8 @@ offset_hp   = byte(0x0040)
 # Read [PlayerBase] + 0x40
 current_hp = (player_base >> offset_hp)
 ```
+#
+
 ### 4. **Bitwise Operations**
 You can perform bitwise logic between memory addresses or constants.
 
@@ -140,6 +152,7 @@ flags = byte(0x5000)
 masked = (flags & 0x03)
 is_active = (masked == 0x03)
 ```
+#
 
 ### 5. **Conditions & Flags**
 A `Condition` is generated when you compare a `MemoryValue` (e.g., `==`, `>`, `<=`). You can attach special behaviors to these conditions.
@@ -172,6 +185,8 @@ reset = (lives == 0).with_flag(Flag.RESET_IF)
 # Show progress bar for 100 coins
 measure = (coins >= 100).with_flag(Flag.MEASURED)
 ```
+#
+
 ### 6. **Remember & Recall**
 This system allows you to store a memory value and compare it against itself later in the same frame evaluation.
 

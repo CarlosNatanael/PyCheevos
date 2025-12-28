@@ -16,7 +16,10 @@ The **Models** module defines the structural components of a RetroAchievements s
     - [Initialization](#initialization-3)
     - [Lookups](#lookups)
     - [Display](#displays)
-5. [How it works](#5-under-the-hood-how-it-works)
+5. [Game Objects](#5-game-objects-poo)
+    - [Definig a Class](#defining-a-class)
+    - [Static vs Dynamic](#usage-static-vs-dynamic)
+6. [How it works](#5-under-the-hood-how-it-works)
     - [The code](#the-code)
 
 ### 1. **AchievementSet**
@@ -126,7 +129,46 @@ The **Display** string is evaluated top-to-bottom. The first condition that eval
 
 #
 
-### 5. **Under the Hood: How it works**
+### 5. **Game Objects (POO)**
+You can create reusable classes for game entities (like Player, Enemy, Inventory) using the `GameObject` base class. This allows you to define memory offsets once and reuse them for both static memory addresses and dynamic pointers.
+
+#### **Defining a Class**
+Inherit from `GameObject` and use `self.offset()` to map memory relative to the object's base.
+
+```python
+from models.generic import GameObject
+from core.helpers import byte, word
+
+class Player(GameObject):
+    def __init__(self, address):
+        super().__init__(address)
+        # Define properties: self.offset(distance, type)
+        self.health = self.offset(0x00, byte)
+        self.coins  = self.offset(0x04, word)
+    
+    def is_dead(self):
+        return self.health == 0
+```
+
+#### **Usage (Static vs Dynamic)**
+The logic handles both integers (Static RAM) and MemoryValues (Pointers) automatically.
+
+```python
+from core.helpers import dword
+
+# Scenario A: Player is always at 0x1000
+p1 = Player(0x1000)
+
+# Scenario B: Player is at the address pointed to by 0x5000
+pointer = dword(0x5000)
+p2 = Player(pointer)
+
+# Using properties
+ach.add_core(p1.is_dead())
+ach.add_core(p2.coins >= 50)
+```
+#
+### 6. **Under the Hood: How it works**
 Here is a complete example showing the Python code and the exact string PyCheevos generates for RetroAchievements.
 
 **The Scenario: "Untouchable"**
