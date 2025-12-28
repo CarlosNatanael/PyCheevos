@@ -30,7 +30,7 @@ class AchievementSet:
         If the path is not specified, it saves to: /output/Title - ID/
         """
         if path is None:
-            root = Path(__file__).resolve().parent.parent
+            root = Path.cwd()
             output = root / "output" / f"{self.title} - {self.game_id}"
         else:
             output = Path(path)
