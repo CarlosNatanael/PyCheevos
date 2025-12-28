@@ -156,7 +156,7 @@ def damage_car():
 
     # 3. Trigger: Event changed to 7 (Victory)
     victory_cond = (mem_event == 7)
-    vitorycond.flag = Flag.TRIGGER
+    victory_cond.flag = Flag.TRIGGER
 
     # 4. Delta Check: Event was 13 previously
     delta_circuit = (mem_event.delta() == 13)
