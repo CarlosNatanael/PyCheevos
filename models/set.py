@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import List, Optional
 from pathlib import Path
 from .achievement import Achievement
 from .leaderboard import Leaderboard
@@ -27,7 +27,6 @@ class AchievementSet:
     def save(self, path: Optional[str] = None):
         """
         Generates the User.txt and Rich.txt files.
-        If the path is not specified, it saves to: /output/Title - ID/
         """
         if path is None:
             root = Path.cwd()
@@ -37,8 +36,8 @@ class AchievementSet:
 
         output.mkdir(parents=True, exist_ok=True)
         
+        # 1. Saves Achievements/Leaderboards (User.txt)
         user_file = output / f"{self.game_id}-User.txt"
-        
         with open(user_file, "w", encoding="utf-8") as f:
             f.write("1.0\n")
             f.write(f"{self.title}\n")
@@ -46,12 +45,11 @@ class AchievementSet:
                 f.write(ach.render() + "\n")
             for lb in self.leaderboards:
                 f.write(lb.render() + "\n")
-        
         print(f"Generated User file: {user_file}")
 
+        # 2. Saves Rich Presence (Rich.txt)
         if self.rich_presence:
             rp_file = output / f"{self.game_id}-Rich.txt"
             with open(rp_file, "w", encoding="utf-8") as f:
                 f.write(self.rich_presence.render())
-            
             print(f"Generated Rich Presence file: {rp_file}")
