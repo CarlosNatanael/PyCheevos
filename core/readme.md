@@ -17,6 +17,8 @@ While `models` (Achievement, Set) handle the "structure", `core` handles the "lo
     - [Pointer Chains](#pointer-chains-)
 5. [Bitwise Operations](#4-bitwise-operations)
 6. [Conditions & Flags](#5-conditions--flags)
+    - [Hit Counts](#hit-counts-with_hits)
+    - [Applying Flags](#applying-flags-with_flag)
 7. [Remember & Recall](#6-remember--recall)
 
 #
@@ -158,33 +160,39 @@ is_active = (masked == 0x03)
 ### 5. **Conditions & Flags**
 A `Condition` is generated when you compare a `MemoryValue` (e.g., `==`, `>`, `<=`). You can attach special behaviors to these conditions.
 
-`.with_hits(count)`
-
+#### **Hit Counts (`.with_hits`)**
 Requires the condition to be true `count` times for the achievement to trigger.
 
 ```python
 # Trigger only after being in this state for 60 frames (1 second)
 (state == 1).with_hits(60)
 ```
+#### **Applying Flags (`.with_flag`)**
+You can apply flags like `ResetIf`, `PauseIf`, or `Remember` directly to memory addresses, pointer expressions, or comparisons.
 
+**Available flags** (imported from `core.constants`):
+- `reset_if` / `Flag.RESET_IF`: Resets the achievement progress if true.
+- `pause_if` / `Flag.PAUSE_IF`: Pauses hit counting if true.
+- `trigger` / `Flag.TRIGGER`: Explicit trigger condition.
+- `measured` / `Flag.MEASURED`: Shows a progress bar in the overlay.
+- `remember` / `Flag.REMEMBER`: Stores the value for `recall()`.
 
-`.with_flag(Flag)`
+#### **Usage Examples**:
 
-Applies logic flags like Reset, Pause, or Measured. Available flags in `core.constants.Flag`:
-- `Flag.RESET_IF`: Resets the achievement progress if true.
-- `Flag.PAUSE_IF`: Pauses hit counting if true.
-- `Flag.TRIGGER`: Explicit trigger condition.
-- `Flag.MEASURED`: Shows a progress bar in the overlay.
-
-#### **Usage Example:**
 ```python
-from core.constants import Flag
+from core.constants import reset_if, measured, remember
 
-# Reset if player dies
-reset = (lives == 0).with_flag(Flag.RESET_IF)
+# 1. On a comparison (Standard)
+# Reset if player dies (Lives < Previous Lives)
+(lives < prior(lives)).with_flag(reset_if)
 
-# Show progress bar for 100 coins
-measure = (coins >= 100).with_flag(Flag.MEASURED)
+# 2. Directly on Memory (New!)
+# Measure the timer value directly (no need for wrapper)
+timer.with_flag(measured)
+
+# 3. On Pointer Expressions (New!)
+# Remember the value behind a pointer chain
+(pointer_base >> offset).with_flag(remember)
 ```
 #
 
