@@ -16,19 +16,26 @@ class MemoryExpression:
     def __init__(self, start_term, start_flag=Flag.ADD_SOURCE): 
         self.terms = [(start_term, start_flag)]
 
+    def _copy(self):
+        new_expr = MemoryExpression(self.terms[0][0], self.terms[0][1])
+        new_expr.terms = self.terms[:]
+        return new_expr
+
     def __add__(self, other):
-        self.terms.append((other, Flag.ADD_SOURCE))
-        return self
+        new_expr = self._copy()
+        new_expr.terms.append((other, Flag.ADD_SOURCE))
+        return new_expr
     
     def __sub__(self, other):
-        self.terms.append((other, Flag.SUB_SOURCE))
-        return self
+        new_expr = self._copy()
+        new_expr.terms.append((other, Flag.SUB_SOURCE))
     
     def __rshift__(self, other):
-        last_term, _ = self.terms.pop()
-        self.terms.append((last_term, Flag.ADD_ADDRESS))
-        self.terms.append((other, Flag.ADD_SOURCE))
-        return self
+        new_expr = self._copy()
+        last_term, _ = new_expr.terms.pop()
+        new_expr.terms.append((last_term, Flag.ADD_ADDRESS))
+        new_expr.terms.append((other, Flag.ADD_SOURCE))
+        return new_expr
 
     def _apply_modifier(self, method_name):
         new_expr = MemoryExpression(self.terms[0][0], self.terms[0][1])
