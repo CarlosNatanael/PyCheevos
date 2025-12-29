@@ -47,6 +47,17 @@ class MemoryExpression:
     def prior(self): return self._apply_modifier("prior")
     def bcd(self):   return self._apply_modifier("bcd")
 
+    def with_flag(self, flag: Flag) -> ConditionList:
+        from .condition import Condition
+        conditions = []
+        for i in range(len(self.terms)):
+            val, term_flag = self.terms[i]
+            if i == len(self.terms) - 1:
+                conditions.append(Condition(val, flag=flag))
+            else:
+                conditions.append(Condition(val, flag=term_flag))
+        return ConditionList(conditions)
+
     def _build_conditions(self, cmp: str, rvalue) -> ConditionList:
         from .condition import Condition
         from .value import ConstantValue
@@ -83,6 +94,10 @@ class MemoryValue:
     @property
     def raw_address(self) -> int:
         return self.address
+    
+    def with_flag(self, flag: Flag):
+        from .condition import Condition
+        return Condition(self, flag=flag)
 
     def __rshift__(self, other):
         expr = MemoryExpression(self, start_flag=Flag.ADD_ADDRESS)
@@ -147,6 +162,7 @@ class MemoryValue:
 class RecallValue(MemoryValue):
     def __init__(self):
         super().__init__(0, MemorySize.BIT8, MemoryType.RECALL)
+
 class ConstantValue:
     def __init__(self, value: int):
         self.value = value
