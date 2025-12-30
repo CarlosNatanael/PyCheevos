@@ -2,7 +2,7 @@ from typing import List, Union
 from core.condition import Condition
 
 class Achievement:
-    def __init__(self, title: str, description: str, points: int, id: int = 1, badge: str = "00000"):
+    def __init__(self, title: str, description: str, points: int, id: int = 0, badge: str = "00000"):
         self.id = id
         self.title = title
         self.description = description
