@@ -21,8 +21,8 @@ def word_be(address: int) -> MemoryValue: return MemoryValue(address, MemorySize
 def tbyte_be(address: int) -> MemoryValue: return MemoryValue(address, MemorySize.BIT24_BE)
 def dword_be(address: int) -> MemoryValue: return MemoryValue(address, MemorySize.BIT32_BE)
 
-def float(address: int) -> MemoryValue: return MemoryValue(address, MemorySize.FLOAT)
-def float_be(address: int) -> MemoryValue: return MemoryValue(address, MemorySize.FLOAT_BE)
+def float32(address: int) -> MemoryValue: return MemoryValue(address, MemorySize.FLOAT)
+def float32_be(address: int) -> MemoryValue: return MemoryValue(address, MemorySize.FLOAT_BE)
 
 def mbf32(address: int) -> MemoryValue: return MemoryValue(address, MemorySize.MBF32)
 def mbf32_le(address: int) -> MemoryValue: return MemoryValue(address, MemorySize.MBF32_LE)
