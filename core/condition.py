@@ -11,8 +11,8 @@ class Condition:
             flag: Flag = Flag.NONE,
             hits: int = 0
     ):
-        if isinstance(lvalue, int, float): lvalue = ConstantValue(lvalue)
-        if isinstance(rvalue, int, float): rvalue = ConstantValue(rvalue)
+        if isinstance(lvalue, (int, float)): lvalue = ConstantValue(lvalue)
+        if isinstance(rvalue, (int, float)): rvalue = ConstantValue(rvalue)
 
         self.lvalue = lvalue
         self.cmp = cmp
