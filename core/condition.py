@@ -5,14 +5,14 @@ from typing import Union, Optional
 class Condition:
     def __init__(
             self,
-            lvalue: Union[MemoryValue, ConstantValue, int],
+            lvalue: Union[MemoryValue, ConstantValue, int, float],
             cmp: str = "=",
-            rvalue: Optional[Union[MemoryValue, ConstantValue, int]] = None,
+            rvalue: Optional[Union[MemoryValue, ConstantValue, int, float]] = None,
             flag: Flag = Flag.NONE,
             hits: int = 0
     ):
-        if isinstance(lvalue, int): lvalue = ConstantValue(lvalue)
-        if isinstance(rvalue, int): rvalue = ConstantValue(rvalue)
+        if isinstance(lvalue, int, float): lvalue = ConstantValue(lvalue)
+        if isinstance(rvalue, int, float): rvalue = ConstantValue(rvalue)
 
         self.lvalue = lvalue
         self.cmp = cmp

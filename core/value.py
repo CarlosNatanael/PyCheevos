@@ -171,7 +171,9 @@ class RecallValue(MemoryValue):
         super().__init__(0, MemorySize.BIT8, MemoryType.RECALL)
 
 class ConstantValue:
-    def __init__(self, value: int):
+    def __init__(self, value: Union[int, float]):
         self.value = value
     def render(self) -> str:
+        if isinstance(self.value, float):
+            return f"f{self.value}"
         return str(self.value)
