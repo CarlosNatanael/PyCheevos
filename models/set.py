@@ -48,11 +48,21 @@ class AchievementSet:
         with open(user_file, "w", encoding="utf-8") as f:
             f.write("1.0\n")
             f.write(f"{self.title}\n")
+
             for ach in self.achievements:
-                f.write(ach.render() + "\n")
+                try:
+                    f.write(ach.render() + "\n")
+                except Exception as e:
+                    print(f"error in ID achievement {ach.id}: '{ach.title}'")
+                    print(f" description: {ach.description}")
+                    raise e
+            
             for lb in self.leaderboards:
-                f.write(lb.render() + "\n")
-        print(f"Generated User file: {user_file}")
+                try:
+                    f.write(lb.render() + "\n")
+                except Exception as e:
+                    print(f"error in Leaderboard ID {lb.id}: '{lb.title}'")
+                    raise e
 
         # 2. Saves Rich Presence (Rich.txt)
         if self.rich_presence:
