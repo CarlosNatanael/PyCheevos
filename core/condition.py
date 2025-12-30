@@ -20,13 +20,18 @@ class Condition:
         self.flag = flag
         self.hits = hits
     
+    def _copy(self):
+        return Condition(self.lvalue, self.cmp, self.rvalue, self.flag, self.hits)
+
     def with_hits(self, hits: int):
-        self.hits = hits
-        return self
+        new_cond = self._copy()
+        new_cond.hits = hits
+        return new_cond
 
     def with_flag(self, flag: Flag):
-        self.flag = flag
-        return self
+        new_cond = self._copy()
+        new_cond.flag = flag
+        return new_cond
 
     def render(self) -> str:
         parts = [self.flag.value]
