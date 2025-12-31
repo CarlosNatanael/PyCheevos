@@ -63,6 +63,7 @@ class AchievementSet:
                 except Exception as e:
                     print(f"error in Leaderboard ID {lb.id}: '{lb.title}'")
                     raise e
+        print(f"Generated User file: {user_file}")
 
         # 2. Saves Rich Presence (Rich.txt)
         if self.rich_presence:
