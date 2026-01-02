@@ -11,7 +11,7 @@ sys.path.insert(0, ROOT_DIR)
 CACHE_PATH_FILE = os.path.join(ROOT_DIR, '.racache_path')
 LOGIN_CACHE_FILE = os.path.join(ROOT_DIR, '.login_cache')
 
-# --- FUNÇÕES DE CONFIGURAÇÃO ---
+# --- CONFIGURATION FUNCTIONS ---
 
 def get_racache_path():
     path = None
@@ -71,10 +71,9 @@ def get_credentials():
     
     return user, password
 
-# --- FUNÇÕES DE BUSCA E PARSE ---
+# --- SEARCH AND PARSE FUNCTIONS ---
 
 def find_all_candidates(base_path, game_id):
-    """Retorna TODOS os arquivos candidatos encontrados, não apenas o primeiro."""
     print(f"[DEBUG] Scanning {base_path} for ID {game_id}...")
     
     candidates = []
@@ -120,7 +119,7 @@ def parse_local_file(file_path):
         print(f"[ERROR] Failed to read {os.path.basename(file_path)}: {e}")
     return notes
 
-# --- FUNÇÕES DE SERVIDOR ---
+# --- SERVER FUNCTIONS ---
 
 def fetch_server_notes(game_id):
     user, password = get_credentials()
@@ -156,7 +155,7 @@ def fetch_server_notes(game_id):
     
     return None
 
-# --- GERAÇÃO DE ARQUIVO ---
+# --- FILE GENERATION ---
 
 def sanitize_name(note_text):
     clean = re.sub(r'\[.*?\]|\(.*?\)', '', note_text)
@@ -165,11 +164,15 @@ def sanitize_name(note_text):
         if sep in clean:
             clean = clean.split(sep)[0]
             break
-    clean = re.sub(r'[^a-zA-Z0-9_\s]', '', clean)
-    clean = "_".join(clean.lower().split())
+    clean = re.sub(r'[^a-zA-Z0-9\s]', '', clean)
+    words = clean.lower().split()
+    if len(words) > 3:
+        words = words[:3]
+    clean = "_".join(words)
+    
     if clean and clean[0].isdigit(): 
         clean = "var_" + clean
-    return clean[:45]
+    return clean[:35]
 
 def detect_type(note_text):
     lower = note_text.lower()
@@ -214,8 +217,7 @@ def generate_script(game_id, notes, source):
         else:
             used_names[var_name] = 1
 
-        # --- NOVA FORMATAÇÃO DE COMENTÁRIOS ---
-        
+        # --- COMMENT FORMAT ---
         type_label = "8-bit"
         if mem_type == "word": type_label = "16-bit"
         elif mem_type == "tbyte": type_label = "24-bit"
@@ -278,7 +280,7 @@ def main():
         if notes_found:
             break
 
-        # 3. Fallback para Servidor
+        # --- Fallback to Server ---
         print(f"\n[INFO] No usable local notes found for ID {game_id}.")
         print("Options:")
         print("  [1] Try another Game ID")
