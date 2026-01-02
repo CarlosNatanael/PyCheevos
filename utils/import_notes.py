@@ -1,37 +1,42 @@
-import requests
-import re
 import os
 import sys
-import getpass
 import json
+import re
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, ROOT_DIR)
 
-CACHE_FILE = os.path.join(ROOT_DIR, '.login_cache')
+CACHE_CONFIG_FILE = os.path.join(ROOT_DIR, '.racache_path')
 
-def load_cached_credentials():
-    if os.path.exists(CACHE_FILE):
+def load_cache_path():
+    if os.path.exists(CACHE_CONFIG_FILE):
         try:
-            with open(CACHE_FILE, 'r') as f:
-                data = json.load(f)
-                return data.get('user'), data.get('password')
+            with open(CACHE_CONFIG_FILE, 'r') as f:
+                path = f.read().strip()
+                if os.path.exists(path):
+                    return path
         except:
-            return None, None
-    return None, None
+            return None
+    return None
 
-def save_credentials(user, password):
+def save_cache_path(path):
     try:
-        with open(CACHE_FILE, 'w') as f:
-            json.dump({'user': user, 'password': password}, f)
-        print(f"\n[INFO] Credentials saved in '{CACHE_FILE}' for future use.\n")
+        with open(CACHE_CONFIG_FILE, 'w') as f:
+            f.write(path)
+        print(f"\n[INFO] Path saved in '{CACHE_CONFIG_FILE}'.\n")
     except Exception as e:
-        print(f"\n[WARN] Could not save credentials: {e}\n")
+        print(f"\n[WARN] Path could not be saved: {e}\n")
 
-def clear_credentials():
-    if os.path.exists(CACHE_FILE):
-        os.remove(CACHE_FILE)
-        print("\n[INFO] Invalid login cache removed.\n")
+def find_file(base_path, filename_pattern):
+    print(f"[LOG] Searching for '{filename_pattern}' in '{base_path}'...")
+    
+    for root, dirs, files in os.walk(base_path):
+        for file in files:
+            if file.lower() == filename_pattern.lower():
+                full_path = os.path.join(root, file)
+                return full_path
+                
+    return None
 
 def sanitize_name(note_text):
     clean = re.sub(r'\[.*?\]|\(.*?\)', '', note_text)
@@ -49,81 +54,112 @@ def detect_type(note_text):
     if "float" in lower: return "float32"
     return "byte"
 
-def main():
-    print("--- PyCheevos Note Importer ---")
-    user, password = load_cached_credentials()
-    from_cache = False
+def parse_user_txt(file_path):
+    notes = []
+    try:
+        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            for line in f:
+                if line.startswith('N0:'):
+                    parts = line.split(':', 2)
+                    if len(parts) >= 3:
+                        addr_str = parts[1]
+                        note_text = parts[2].strip().strip('"')
+                        notes.append({"Address": addr_str, "Note": note_text})
+    except Exception as e:
+        print(f"[ERROR]: Error reading file: {e}\n")
+    return notes
 
-    if user and password:
-        print(f"Logging in as: {user} (via cache)")
-        from_cache = True
-    else:
-        if not user:
-            user = input("RA Username: ").strip()
+def parse_json_cache(file_path):
+    notes = []
+    try:
+        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            data = json.load(f)
+            raw_notes = []
+            if isinstance(data, list):
+                raw_notes = data
+            else:
+                raw_notes = data.get('CodeNotes', []) or data.get('Notes', [])
+
+            for n in raw_notes:
+                notes.append({
+                    "Address": n.get('Address'),
+                    "Note": n.get('Note')
+                })
+    except Exception as e:
+        pass
+    return notes
+
+def main():
+    print("--- PyCheevos Note Importer (Smart Local) ---")
+    racache_path = load_cache_path()
+    
+    if racache_path:
+        print(f"Using saved folder: {racache_path}")
+        if input("Change? (y/n): ").lower() == 'y':
+            racache_path = None
+
+    if not racache_path:
+        print("\n[INFO]: Specify the emulator folder Root")
+        print("[INFO]: The script will automatically search in subfolders.\n")
         
-        if not password:
-            if user:
-                password = getpass.getpass("RA Password: ").strip()
+        try:
+            import tkinter as tk
+            from tkinter import filedialog
+            root = tk.Tk()
+            root.withdraw()
+            root.attributes('-topmost', True)
+            print("[INFO]: Opening folder selection window...")
+            racache_path = filedialog.askdirectory(title="Select Emulator Folder")
+            
+            root.destroy()
+        except:
+            pass
+        if not racache_path:
+            racache_path = input("Path: ").strip().strip('"').strip("'")
+        
+        if os.path.exists(racache_path):
+            save_cache_path(racache_path)
+        else:
+            print("\n[ERROR]: Folder not found.\n")
+            return
 
     game_id = input("Game ID: ").strip()
+    print("")
+    if not game_id: return
 
-    if not user or not password or not game_id:
-        print("\n[ERROR]: All fields are required.\n")
+    final_notes = []
+    source_used = ""
+
+    user_txt = find_file(racache_path, f"{game_id}-User.txt")
+    if user_txt:
+        print(f"User.txt found: {user_txt}\n")
+        final_notes = parse_user_txt(user_txt)
+        source_used = "User.txt (Local)"
+
+    if not final_notes:
+        notes_json = find_file(racache_path, f"{game_id}-Notes.json")
+        if notes_json:
+            print(f"Notes.json found: {notes_json}\n")
+            final_notes = parse_json_cache(notes_json)
+            source_used = "Notes.json"
+
+    if not final_notes:
+        official_json = find_file(racache_path, f"{game_id}.json")
+        if official_json:
+            print(f"Official Cache Found: {official_json}")
+            final_notes = parse_json_cache(official_json)
+            source_used = "Game Cache"
+
+    if not final_notes:
+        print(f"\nNo notes were found for ID {game_id} in the specified folder.")
+        print("Make sure you load the game into the emulator at least once.\n")
         return
 
-    print(f"\n[1/3] Authenticating...\n")
-    url = "https://retroachievements.org/dorequest.php"
-    
-    sess = requests.Session()
-    sess.headers.update({'User-Agent': f'PyCheevos_Importer/1.0 ({user})'})
-    
-    try:
-        login_resp = sess.post(url, data={'r': 'login', 'u': user, 'p': password}).json()
-        
-        if not login_resp.get('Success'):
-            print(f"Login failed: {login_resp.get('Error')}\n")
-            if from_cache:
-                clear_credentials()
-                print("Please run the script again to enter the correct password.")
-            return
-            
-        token = login_resp.get('Token')
-        print("[LOG]: Login successful! Token obtained.\n")
-        
-        if not from_cache:
-            save_opt = input("Do you want to save the credentials locally? (y/n): ").lower()
-            if save_opt == 'y':
-                save_credentials(user, password)
+    print(f"Success! {len(final_notes)} notes extracted from {source_used}.")
 
-    except Exception as e:
-        print(f"Connection error: {e}")
-        return
-
-    print(f"[2/3] Downloading game notes {game_id}...\n")
-    
-    notes_payload = {'r': 'codenotes2', 'g': game_id, 'u': user, 't': token}
-    
-    try:
-        notes_resp = sess.post(url, data=notes_payload).json()
-        if not notes_resp.get('Success'):
-            print("Trying the old method...")
-            notes_payload['r'] = 'codenotes'
-            notes_resp = sess.post(url, data=notes_payload).json()
-            if not notes_resp.get('Success'):
-                print(f"Error downloading notes: {notes_resp.get('Error')}")
-                return
-        raw_notes = notes_resp.get('CodeNotes', [])
-        print(f"Success! {len(raw_notes)} notes found. Generating file...\n")
-
-    except Exception as e:
-        print(f"Error processing data: {e}")
-        return
-
-    print(f"[3/3] Processing file...")
-    
     lines = []
     lines.append(f"# Code Notes for Game ID {game_id}")
-    lines.append(f"# Automatically generated by PyCheevos")
+    lines.append(f"# Source: {source_used}")
     lines.append("")
     lines.append("from core.helpers import byte, word, dword, tbyte, float32")
     lines.append("")
@@ -131,17 +167,22 @@ def main():
     count = 0
     used_names = {}
 
-    for note in raw_notes:
+    for note in final_notes:
         addr = note["Address"]
         text = note.get("Note", "")
-
         if not text: continue
+
+        if isinstance(addr, int): addr = hex(addr)
+        elif isinstance(addr, str) and not addr.startswith("0x"):
+            try: addr = hex(int(addr))
+            except: 
+                try: addr = "0x" + addr
+                except: pass
 
         mem_type = detect_type(text)
         var_name = sanitize_name(text)
-
         if not var_name: var_name = f"unk_{addr}"
-
+        
         if var_name in used_names:
             used_names[var_name] += 1
             var_name = f"{var_name}_{used_names[var_name]}"
@@ -149,7 +190,6 @@ def main():
             used_names[var_name] = 1
 
         comment = text.replace('\n', ' | ').replace('\r', '')
-
         lines.append(f"# {addr}: {comment}")
         lines.append(f"{var_name} = {mem_type}({addr})")
         lines.append("")
@@ -157,15 +197,13 @@ def main():
 
     output_dir = os.path.join(ROOT_DIR, 'scripts')
     if not os.path.exists(output_dir): os.makedirs(output_dir)
-        
     filename = os.path.join(output_dir, f"notes_{game_id}.py")
     
     with open(filename, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
-    print("-------------------------------------------")
-    print(f"Success! File generated in: {filename}")
+
+    print(f"\nSuccess! File generated in: {filename}")
     print(f"Total number of addresses mapped: {count}")
-    print("-------------------------------------------")
 
 if __name__ == "__main__":
     main()
