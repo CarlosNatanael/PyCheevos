@@ -46,7 +46,7 @@ def main():
         print("Error: All fields are required.")
         return
 
-    print(f"\n[LOG] dados recebidos -> User:{user} | ID:{game_id}\n")
+    print(f"\n[LOG]: data received -> User:{user} | ID:{game_id}\n")
 
     if not user or not password or not game_id:
         print("Error: All fields are required")
@@ -66,15 +66,15 @@ def main():
         resp_login = sess.post(url, data=login_params).json()
 
         if not resp_login.get('Success'):
-            print(f"Falha no login: {resp_login.get('Error')}")
+            print(f"Login failed: {resp_login.get('Error')}")
 
         token = resp_login.get('Token')
-        print("[LOG]: Login realizado! Token obtido.\n")
+        print("[LOG]: Login successful! Token obtained.\n")
     except Exception as e:
         print(f"Connection error: {e}")
         return
     
-    print(f"[LOG] Baixando notas do jogo {game_id}...\n")
+    print(f"[LOG] Downloading game notes for {game_id}...\n")
     
     notes_params = {
         'r': 'codenotes2',
@@ -87,8 +87,8 @@ def main():
         resp_notes = sess.post(url, data=notes_params).json()
         
         if not resp_notes.get('Success'):
-            print(f"Erro ao baixar notas: {resp_notes.get('Error')}")
-            print("Tentando método antigo...")
+            print(f"Error downloading notes: {resp_notes.get('Error')}")
+            print("Trying the old method...")
             notes_params['r'] = 'codenotes'
             resp_notes = sess.post(url, data=notes_params).json()
             if not resp_notes.get('Success'):
@@ -97,7 +97,7 @@ def main():
         print(f"Success! {len(notes)} notes found. Generating file...\n")
 
     except Exception as e:
-        print(f"Erro ao processar notas: {e}")
+        print(f"Error processing grades: {e}")
 
     lines = []
     lines.append(f"# Code notes for game ID {game_id}")
