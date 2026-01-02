@@ -40,7 +40,7 @@ def find_file(base_path, filename_pattern):
 
 def sanitize_name(note_text):
     clean = re.sub(r'\[.*?\]|\(.*?\)', '', note_text)
-    clean = re.sub(r'[^a-zA-Z0-9\s]', '', clean)
+    clean = re.sub(r'[^a-zA-Z0-9_\s]', '', clean)
     clean = "_".join(clean.lower().split())
     if clean and clean[0].isdigit():
         clean = "var_" + clean
@@ -179,13 +179,18 @@ def main():
                 try: addr = "0x" + addr
                 except: pass
 
+        clean_text = re.sub(r'^\s*\[[^\]]+\]\s*', '', text)  # remove [bit] tags
+        clean_text = re.split(r'[\n\r|]', clean_text, 1)[0]  # stop at newline or |
+        clean_text = clean_text.replace('/', '_')            # turn / into _
+        clean_text = clean_text.strip()                      # trim spaces
+
         mem_type = detect_type(text)
-        var_name = sanitize_name(text)
+        var_name = sanitize_name(clean_text)
         if not var_name: var_name = f"unk_{addr}"
         
         if var_name in used_names:
             used_names[var_name] += 1
-            var_name = f"{var_name}_{used_names[var_name]}"
+            var_name = f"{var_name}_{addr}"
         else:
             used_names[var_name] = 1
 
