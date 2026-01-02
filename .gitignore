@@ -10,6 +10,7 @@ __pycache__/
 
 # Distribution / packaging
 .racache_path
+.login_cache
 .Python
 build/
 develop-eggs/
