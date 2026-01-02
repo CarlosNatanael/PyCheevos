@@ -502,7 +502,7 @@ def msCartmanUnlock():
         raceOutcome,
         playerWin,
         resetToCountdown,
-        (playerCheckpoint).with_flag(trigger),
+        (playerCheckpoint != 0x00).with_flag(trigger),
         (ai1Checkpoint != 0x00).with_flag(reset_if),
         (ai2Checkpoint != 0x00).with_flag(reset_if),
         (ai3Checkpoint != 0x00).with_flag(reset_if),
