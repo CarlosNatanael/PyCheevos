@@ -9,7 +9,7 @@ __pycache__/
 
 
 # Distribution / packaging
-config.py
+.login_cache
 .Python
 build/
 develop-eggs/

@@ -3,15 +3,35 @@ import re
 import os
 import sys
 import getpass
+import json
 
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, ROOT_DIR)
 
-try:
-    from config import USER, PASSWORD
-except ImportError:
-    USER = ""
-    PASSWORD = ""
+CACHE_FILE = os.path.join(ROOT_DIR, '.login_cache')
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+def load_cached_credentials():
+    if os.path.exists(CACHE_FILE):
+        try:
+            with open(CACHE_FILE, 'r') as f:
+                data = json.load(f)
+                return data.get('user'), data.get('password')
+        except:
+            return None, None
+    return None, None
+
+def save_credentials(user, password):
+    try:
+        with open(CACHE_FILE, 'w') as f:
+            json.dump({'user': user, 'password': password}, f)
+        print(f"\n[INFO] Credentials saved in '{CACHE_FILE}' for future use.\n")
+    except Exception as e:
+        print(f"\n[WARN] Could not save credentials: {e}\n")
+
+def clear_credentials():
+    if os.path.exists(CACHE_FILE):
+        os.remove(CACHE_FILE)
+        print("\n[INFO] Invalid login cache removed.\n")
 
 def sanitize_name(note_text):
     clean = re.sub(r'\[.*?\]|\(.*?\)', '', note_text)
@@ -19,124 +39,124 @@ def sanitize_name(note_text):
     clean = "_".join(clean.lower().split())
     if clean and clean[0].isdigit():
         clean = "var_" + clean
-    return clean[:40]
+    return clean[:45]
 
 def detect_type(note_text):
     lower = note_text.lower()
-    if "32-bit" in lower or "32 bit" in lower or "32bit" in lower: return "dword"
-    if "24-bit" in lower or "24 bit" in lower or "24bit" in lower: return "tbyte"
-    if "16-bit" in lower or "16 bit" in lower or "16bit" in lower: return "word"
+    if "32-bit" in lower or "32 bit" in lower: return "dword"
+    if "24-bit" in lower or "24 bit" in lower: return "tbyte"
+    if "16-bit" in lower or "16 bit" in lower: return "word"
     if "float" in lower: return "float32"
     return "byte"
 
 def main():
-    print("--- Pycheevos Note Importer (Debug Mode) ---")
+    print("--- PyCheevos Note Importer ---")
+    user, password = load_cached_credentials()
+    from_cache = False
 
-    user = USER if USER else input("RA Username: ").strip()
-    if not user:
-        user = input("RA Username: ").strip()
-
-    password = PASSWORD if PASSWORD else getpass.getpass("RA Password: ").strip()
-    if not password:
-        password = getpass.getpass("RA Password: ").strip()
+    if user and password:
+        print(f"Logging in as: {user} (via cache)")
+        from_cache = True
+    else:
+        if not user:
+            user = input("RA Username: ").strip()
+        
+        if not password:
+            if user:
+                password = getpass.getpass("RA Password: ").strip()
 
     game_id = input("Game ID: ").strip()
 
     if not user or not password or not game_id:
-        print("Error: All fields are required.")
+        print("\n[ERROR]: All fields are required.\n")
         return
 
-    print(f"\n[LOG]: data received -> User:{user} | ID:{game_id}\n")
-
-    if not user or not password or not game_id:
-        print("Error: All fields are required")
-        return
-
+    print(f"\n[1/3] Authenticating...\n")
     url = "https://retroachievements.org/dorequest.php"
     
-    login_params = {
-        'r': 'login',
-        'u': user,
-        'p': password
-    }
-
+    sess = requests.Session()
+    sess.headers.update({'User-Agent': f'PyCheevos_Importer/1.0 ({user})'})
+    
     try:
-        sess = requests.Session()
-        sess .headers.update({'User-Agent': f'PyCheevos_Importer/1.0 ({user})'})
-        resp_login = sess.post(url, data=login_params).json()
-
-        if not resp_login.get('Success'):
-            print(f"Login failed: {resp_login.get('Error')}")
-
-        token = resp_login.get('Token')
+        login_resp = sess.post(url, data={'r': 'login', 'u': user, 'p': password}).json()
+        
+        if not login_resp.get('Success'):
+            print(f"Login failed: {login_resp.get('Error')}\n")
+            if from_cache:
+                clear_credentials()
+                print("Please run the script again to enter the correct password.")
+            return
+            
+        token = login_resp.get('Token')
         print("[LOG]: Login successful! Token obtained.\n")
+        
+        if not from_cache:
+            save_opt = input("Do you want to save the credentials locally? (y/n): ").lower()
+            if save_opt == 'y':
+                save_credentials(user, password)
+
     except Exception as e:
         print(f"Connection error: {e}")
         return
-    
-    print(f"[LOG] Downloading game notes for {game_id}...\n")
-    
-    notes_params = {
-        'r': 'codenotes2',
-        'g': game_id,
-        'u': user,
-        't': token
-    }
 
+    print(f"[2/3] Downloading game notes {game_id}...\n")
+    
+    notes_payload = {'r': 'codenotes2', 'g': game_id, 'u': user, 't': token}
+    
     try:
-        resp_notes = sess.post(url, data=notes_params).json()
-        
-        if not resp_notes.get('Success'):
-            print(f"Error downloading notes: {resp_notes.get('Error')}")
+        notes_resp = sess.post(url, data=notes_payload).json()
+        if not notes_resp.get('Success'):
             print("Trying the old method...")
-            notes_params['r'] = 'codenotes'
-            resp_notes = sess.post(url, data=notes_params).json()
-            if not resp_notes.get('Success'):
+            notes_payload['r'] = 'codenotes'
+            notes_resp = sess.post(url, data=notes_payload).json()
+            if not notes_resp.get('Success'):
+                print(f"Error downloading notes: {notes_resp.get('Error')}")
                 return
-        notes = resp_notes.get('CodeNotes', [])
-        print(f"Success! {len(notes)} notes found. Generating file...\n")
+        raw_notes = notes_resp.get('CodeNotes', [])
+        print(f"Success! {len(raw_notes)} notes found. Generating file...\n")
 
     except Exception as e:
-        print(f"Error processing grades: {e}")
+        print(f"Error processing data: {e}")
+        return
 
+    print(f"[3/3] Processing file...")
+    
     lines = []
-    lines.append(f"# Code notes for game ID {game_id}")
+    lines.append(f"# Code Notes for Game ID {game_id}")
     lines.append(f"# Automatically generated by PyCheevos")
     lines.append("")
-    lines.append("from core.helpers import byte, word, tbyte, dword, float32")
+    lines.append("from core.helpers import byte, word, dword, tbyte, float32")
     lines.append("")
 
     count = 0
     used_names = {}
 
-    for note in notes: # type: ignore
+    for note in raw_notes:
         addr = note["Address"]
-        raw_note = note.get("Note", "")
-        
-        if not raw_note: continue
+        text = note.get("Note", "")
 
-        mem_type = detect_type(raw_note)
-        var_name = sanitize_name(raw_note)
+        if not text: continue
+
+        mem_type = detect_type(text)
+        var_name = sanitize_name(text)
 
         if not var_name: var_name = f"unk_{addr}"
-        
+
         if var_name in used_names:
             used_names[var_name] += 1
             var_name = f"{var_name}_{used_names[var_name]}"
         else:
             used_names[var_name] = 1
 
-        clean_comment = raw_note.replace('\n', ' ').replace('\r', '')
-        
-        lines.append(f"# {addr}: {clean_comment}")
+        comment = text.replace('\n', ' | ').replace('\r', '')
+
+        lines.append(f"# {addr}: {comment}")
         lines.append(f"{var_name} = {mem_type}({addr})")
         lines.append("")
         count += 1
 
-
-    output_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'scripts'))
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    output_dir = os.path.join(ROOT_DIR, 'scripts')
+    if not os.path.exists(output_dir): os.makedirs(output_dir)
         
     filename = os.path.join(output_dir, f"notes_{game_id}.py")
     
