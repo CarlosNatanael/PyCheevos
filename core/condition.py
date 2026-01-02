@@ -33,7 +33,23 @@ class Condition:
         new_cond.flag = flag
         return new_cond
 
+    def _validate(self):        
+        boolean_flags = [Flag.TRIGGER, Flag.RESET_IF, Flag.PAUSE_IF]
+
+        if self.flag in boolean_flags:
+            if self.rvalue is None:
+                raise ValueError(
+                    f"\nLOGIC ERROR DETECTED!\n"
+                    f"The flag '{self.flag.name}' (Trigger/Reset/Pause) requires a comparison.\n"
+                    f"You wrote something like: (memory).with_flag({self.flag.name})\n"
+                    f"The correct way would be: (memoria != 0).with_flag({self.flag.name})\n"
+                    f"Problematic address/value: {self.lvalue.render()}"
+                )
+
     def render(self) -> str:
+
+        self._validate() 
+
         parts = [self.flag.value]
         parts.append(self.lvalue.render())
         
