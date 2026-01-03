@@ -159,7 +159,7 @@ def fetch_server_notes(game_id):
 
 def sanitize_name(note_text):
     clean = re.sub(r'\[.*?\]|\(.*?\)', '', note_text)
-    separators = [':', '-', '\n', '.', ',']
+    separators = [':', '-', '\n', '.', ',', '=']
     for sep in separators:
         if sep in clean:
             clean = clean.split(sep)[0]
@@ -174,13 +174,55 @@ def sanitize_name(note_text):
         clean = "var_" + clean
     return clean[:35]
 
-def detect_type(note_text):
+def detect_type(note_text, default="byte"):
     lower = note_text.lower()
     if "32-bit" in lower or "32 bit" in lower: return "dword"
     if "24-bit" in lower or "24 bit" in lower: return "tbyte"
     if "16-bit" in lower or "16 bit" in lower: return "word"
     if "float" in lower: return "float32"
-    return "byte"
+    return default
+
+def parse_pointers_in_note(root_var, note_text):
+    pointer_lines = []
+    lines = note_text.split('\n')
+    chain = {0: root_var} 
+    
+    for line in lines:
+
+        stripped = line.strip()
+        if not stripped.startswith('+'):
+            continue
+        depth = 0
+        while depth < len(stripped) and stripped[depth] == '+':
+            depth += 1
+            
+        content = stripped[depth:].strip()
+        match = re.match(r'^(0x[\da-fA-F]+|\d+)', content)
+        if not match: continue
+        
+        offset_str = match.group(1)
+        rest_of_line = content[len(offset_str):].strip()
+        
+        if (depth - 1) not in chain: continue
+        
+        parent_expr = chain[depth - 1]
+    
+        link_type = detect_type(rest_of_line, default="dword")
+        
+        offset_expr = f"{link_type}({offset_str})"
+        full_expr = f"{parent_expr} >> {offset_expr}"
+        
+        var_name = None
+        if len(rest_of_line) > 2:
+            potential_name = sanitize_name(rest_of_line)
+            if potential_name and not potential_name.startswith("unk_"):
+                var_name = potential_name
+        
+        if var_name:
+            pointer_lines.append(f"{var_name} = ({full_expr})")
+        chain[depth] = full_expr
+        
+    return pointer_lines
 
 def generate_script(game_id, notes, source):
     if not notes: return False
@@ -211,13 +253,14 @@ def generate_script(game_id, notes, source):
         var_name = sanitize_name(text)
         if not var_name: var_name = f"unk_{addr}"
 
+        # Resolves duplicate names
         if var_name in used_names:
             used_names[var_name] += 1
             var_name = f"{var_name}_{used_names[var_name]}"
         else:
             used_names[var_name] = 1
 
-        # --- COMMENT FORMAT ---
+        # Comment Formatting
         type_label = "8-bit"
         if mem_type == "word": type_label = "16-bit"
         elif mem_type == "tbyte": type_label = "24-bit"
@@ -234,6 +277,13 @@ def generate_script(game_id, notes, source):
                 lines.append(f"#{extra_line}")
 
         lines.append(f"{var_name} = {mem_type}({addr})")
+        
+        if "+" in text:
+            ptr_vars = parse_pointers_in_note(var_name, text)
+            if ptr_vars:
+                lines.append("# --- Auto-Generated Pointers ---")
+                lines.extend(ptr_vars)
+
         lines.append("")
         count += 1
 
@@ -280,7 +330,7 @@ def main():
         if notes_found:
             break
 
-        # --- Fallback to Server ---
+        # Fallback to Server
         print(f"\n[INFO] No usable local notes found for ID {game_id}.")
         print("Options:")
         print("  [1] Try another Game ID")
