@@ -15,22 +15,21 @@ class Achievement:
 
     def _flatten(self, items) -> List[Condition]:
         flat_list = []
+
+        if not isinstance(items, list):
+            items = [items]
         for item in items:
             if isinstance(item, list):
                 flat_list.extend(self._flatten(item))
             else:
                 flat_list.append(item)
         return flat_list
-
+    
     def add_core(self, conditions: Union[Condition, List]):
-        if not isinstance(conditions, list):
-            conditions = [conditions]
         self.core.extend(self._flatten(conditions))
         return self
     
     def add_alt(self, conditions: Union[Condition, List]):
-        if not isinstance(conditions, list):
-            conditions = [conditions]
         self.alts.append(self._flatten(conditions))
         return self
 
@@ -39,7 +38,7 @@ class Achievement:
         return self
 
     def add_conditions(self, conditions: List[Condition]):
-        self.conditions.extend(conditions)
+        self.conditions.extend(self._flatten(conditions))
         return self
 
     def _render_group(self, conditions: List[Condition]) -> str:
