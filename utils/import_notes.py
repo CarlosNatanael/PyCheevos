@@ -337,7 +337,7 @@ def generate_script(game_id, notes, source):
 
             if stripped.startswith('+'):
                 if current_var:
-                    lines.append(f"{current_var} = {current_expr}")
+                    lines.append(f"{current_var} = {current_expr}") # type: ignore
                     if value_comments:
                         lines.extend(value_comments)
                     lines.append("")  # blank line after variable + comments
@@ -381,7 +381,7 @@ def generate_script(game_id, notes, source):
                 lines.append(f"#{stripped}")
 
         if current_var:
-            lines.append(f"{current_var} = {current_expr}")
+            lines.append(f"{current_var} = {current_expr}") # type: ignore
             if value_comments:
                 lines.extend(value_comments)
             lines.append("")  # one blank line before next note
