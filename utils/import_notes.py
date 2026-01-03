@@ -158,16 +158,16 @@ def fetch_server_notes(game_id):
 # --- FILE GENERATION ---
 
 def sanitize_name(note_text):
+
     clean = re.sub(r'\[.*?\]|\(.*?\)', '', note_text)
     clean = re.sub(r'^[:\-\s_]+', '', clean)
-    separators = ['-', '\n', '.', ',', '=']
-    if clean[0] == "+":
-        separators.append(":")
+
+    separators = ['\n', '.', ',', '=']
     for sep in separators:
         if sep in clean:
             clean = clean.split(sep)[0]
             break
-    clean = re.sub(r":", "_", clean)
+    clean = re.sub(r"[:/-]", "_", clean)
     clean = re.sub(r'[^a-zA-Z0-9_\s]', '', clean)
     words = clean.lower().split()
     clean = "_".join(words)
@@ -178,12 +178,64 @@ def sanitize_name(note_text):
     return clean[:65]
 
 def detect_type(note_text, default="byte"):
-    lower = note_text.lower()
-    if "32-bit" in lower or "32 bit" in lower: return "dword"
-    if "24-bit" in lower or "24 bit" in lower: return "tbyte"
-    if "16-bit" in lower or "16 bit" in lower: return "word"
-    if "float" in lower: return "float32"
+    note_lower = note_text.lower()
+    
+    type_candidates = [
+        # Big-Endian
+        ("dword_be", ["32-bit be", "32 bit be", "be 32 bit", "be 32-bit"]),
+        ("tbyte_be", ["24-bit be", "24 bit be", "be 24 bit", "be 24-bit"]),
+        ("word_be", ["16-bit be", "16 bit be", "be 16 bit", "be 16-bit"]),
+        ("float32_be", ["float be", "be float"]),
+        # Little-Endian / default
+        ("dword", ["32-bit", "32 bit"]),
+        ("tbyte", ["24-bit", "24 bit"]),
+        ("word", ["16-bit", "16 bit"]),
+        ("byte", ["8-bit", "8 bit"]),
+        ("float32", ["float", "32-bit float", "32 bit float"]),
+        # Uncommon
+        ("mfb32_be", ["mbf be", "be mbf", "microsoft binary format"]),
+        ("mfb32", ["mbf", "microsoft binary format"]),
+        ("double32_be", ["double be", "double32 be", "be double", "be double32"]),
+        ("double", ["double32", "double"]),
+        ("bitcount", ["bitcount", "bit count", "bit-count"])
+    ]
+    
+    # --- Step 1: check [Type] at start of line ---
+    match_start = re.match(r'^\s*\[([^\]]+)\]', note_text)
+    if match_start:
+        type_hint = match_start.group(1).lower()
+        # Only accept it if it contains a known type keyword
+        if any(kw in type_hint for _, kws in type_candidates for kw in kws):
+            note_lower = type_hint
+    
+    # --- Step 2: check [Type] at end of line ---
+    match_end = re.search(r'\[([^\]]+)\]\s*$', note_text)
+    if match_end:
+        type_hint = match_end.group(1).lower()
+        if any(kw in type_hint for _, kws in type_candidates for kw in kws):
+            note_lower = type_hint
+    
+    # --- Step 3: first occurrence of a size/type keyword ---
+    for type_name, keywords in type_candidates:
+        for keyword in keywords:
+            if keyword in note_lower:
+                return type_name
+
+    # fallback
     return default
+
+def prefix_region(var_name, note_text):
+    # List of known regions (case-insensitive)
+    regions = ["us", "eu", "jp", "pal", "ntsc"]
+    
+    match = re.search(r'^\s*\[([a-zA-Z]+)\]', note_text)
+    if match:
+        region = match.group(1).lower()
+        if region in regions:
+            # prefix variable name
+            var_name = f"{region}_{var_name}"
+    
+    return var_name
 
 def parse_pointers_in_note(root_var, note_text):
     pointer_lines = []
@@ -229,9 +281,9 @@ def parse_pointers_in_note(root_var, note_text):
 
 def generate_script(game_id, notes, source):
     if not notes: return False
-    
+
     print(f"\n[GEN] Processing {len(notes)} notes from {source}...")
-    
+
     lines = []
     lines.append(f"# Code Notes for Game ID {game_id}")
     lines.append(f"# Source: {source}")
@@ -245,20 +297,22 @@ def generate_script(game_id, notes, source):
     for note in notes:
         addr = note.get("Address")
         text = note.get("Note", "")
-        if not text or not addr: continue
+        if not text or not addr: 
+            continue
 
         if isinstance(addr, int): addr = hex(addr)
         elif not str(addr).startswith("0x"):
             try: addr = hex(int(str(addr)))
             except: pass
 
-        clean_text = re.sub(r'^\s*\[[^\]]+\]\s*', '', text)  # remove [bit] tags
-        clean_text = re.split(r'[\n\r|]', clean_text, 1)[0]  # stop at newline or |
-        clean_text = clean_text.replace('/', '_')            # turn / into _
-        clean_text = clean_text.strip()                      # trim spaces
+        note_lines = text.replace('\r', '').split('\n')
 
-        mem_type = detect_type(text)
+        clean_text = re.sub(r'^\s*\[[^\]]+\]\s*', '', note_lines[0])  # remove [bit] tags
+        clean_text = clean_text.split('\n')[0].strip()
+
+        mem_type = detect_type(note_lines[0])
         var_name = sanitize_name(clean_text)
+        var_name = prefix_region(var_name, text)
         if not var_name: var_name = f"unk_{addr}"
 
         if var_name in used_names:
@@ -266,35 +320,79 @@ def generate_script(game_id, notes, source):
             var_name = f"{var_name}_{addr}"
         else:
             used_names[var_name] = 1
-        # Comment Formatting
-        type_label = "8-bit"
-        if mem_type == "word": type_label = "16-bit"
-        elif mem_type == "tbyte": type_label = "24-bit"
-        elif mem_type == "dword": type_label = "32-bit"
-        elif mem_type == "float32": type_label = "Float"
 
-        note_lines = text.replace('\r', '').split('\n')
-        main_note = note_lines[0]
-        
-        lines.append(f"# {addr}: [{type_label}] {main_note}")
-        
-        for extra_line in note_lines[1:]:
-            if extra_line.strip():
-                lines.append(f"#{extra_line}")
-
+        # Top-level note header + variable
+        lines.append(f"# {addr}: {note_lines[0]}")
         lines.append(f"{var_name} = {mem_type}({addr})")
-        
-        if "+" in text:
-            ptr_vars = parse_pointers_in_note(var_name, text)
-            if ptr_vars:
-                lines.append("# --- Auto-Generated Pointers ---")
-                lines.extend(ptr_vars)
+
+        # --- Nested + / ++ lines ---
+        chain = {0: var_name}
+        current_var = None
+        value_comments = []
+
+        for line in note_lines[1:]:
+            stripped = line.strip()
+            if not stripped:
+                continue
+
+            if stripped.startswith('+'):
+                if current_var:
+                    lines.append(f"{current_var} = {current_expr}")
+                    if value_comments:
+                        lines.extend(value_comments)
+                    lines.append("")  # blank line after variable + comments
+                    value_comments = []
+
+                # Determine depth
+                depth = 0
+                while depth < len(stripped) and stripped[depth] == '+':
+                    depth += 1
+
+                content = stripped[depth:].strip()
+                match = re.match(r'^(0x[\da-fA-F]+|\d+)\s*[:=]?\s*(.*)', content)
+                if not match:
+                    continue
+
+                offset_str = match.group(1)
+                rest_of_line = match.group(2) or ""
+
+                # Get parent expression from chain
+                parent_expr = chain.get(depth - 1, var_name)
+                link_type = detect_type(rest_of_line, default="dword")
+                current_expr = f"{parent_expr} >> {link_type}({offset_str})"
+
+                # Store in chain for children to use
+                chain[depth] = current_expr
+
+                current_var = None
+                potential_name = sanitize_name(rest_of_line)
+                if potential_name:
+                    potential_name = prefix_region(potential_name, text)
+                    if potential_name in used_names:
+                        used_names[potential_name] += 1
+                        current_var = f"{potential_name}_{used_names[potential_name]}_{offset_str}"
+                    else:
+                        used_names[potential_name] = 1
+                        current_var = potential_name
+            
+            if current_var:
+                value_comments.append(f"#{stripped}")
+            else:
+                lines.append(f"#{stripped}")
+
+        if current_var:
+            lines.append(f"{current_var} = {current_expr}")
+            if value_comments:
+                lines.extend(value_comments)
+            lines.append("")  # one blank line before next note
 
         lines.append("")
         count += 1
 
+    # Write to file
     output_dir = os.path.join(ROOT_DIR, 'scripts')
-    if not os.path.exists(output_dir): os.makedirs(output_dir)
+    if not os.path.exists(output_dir): 
+        os.makedirs(output_dir)
     filename = os.path.join(output_dir, f"notes_{game_id}.py")
 
     with open(filename, "w", encoding="utf-8") as f:
