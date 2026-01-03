@@ -75,13 +75,8 @@ def get_credentials():
 
 def find_all_candidates(base_path, game_id):
     print(f"[DEBUG] Scanning {base_path} for ID {game_id}...")
-    
     candidates = []
-    target_files = [
-        f"{game_id}-User.txt",
-        f"{game_id}-Notes.json",
-        f"{game_id}.json"
-    ]
+    target_files = [f"{game_id}-User.txt", f"{game_id}-Notes.json", f"{game_id}.json"]
     targets_lower = [t.lower() for t in target_files]
     
     for root, _, files in os.walk(base_path):
@@ -91,7 +86,6 @@ def find_all_candidates(base_path, game_id):
                 priority = 3
                 if file.lower().endswith("-user.txt"): priority = 1
                 elif file.lower().endswith("-notes.json"): priority = 2
-                
                 candidates.append((priority, full_path, file))
                 print(f"   Candidate found: {file}")
     candidates.sort(key=lambda x: x[0])
@@ -109,10 +103,8 @@ def parse_local_file(file_path):
                             notes.append({"Address": parts[1], "Note": parts[2].strip().strip('"')})
             else:
                 data = json.load(f)
-                if isinstance(data, list):
-                    raw = data
-                else:
-                    raw = data.get('CodeNotes', []) or data.get('Notes', [])
+                if isinstance(data, list): raw = data
+                else: raw = data.get('CodeNotes', []) or data.get('Notes', [])
                 for n in raw:
                     notes.append({"Address": n.get('Address'), "Note": n.get('Note')})
     except Exception as e:
@@ -159,23 +151,17 @@ def fetch_server_notes(game_id):
 
 def sanitize_name(note_text):
     clean = re.sub(r'\[.*?\]|\(.*?\)', '', note_text)
-    clean = re.sub(r'^[:\-\s_]+', '', clean)
-    separators = ['-', '\n', '.', ',', '=']
-    if clean[0] == "+":
-        separators.append(":")
-    for sep in separators:
-        if sep in clean:
-            clean = clean.split(sep)[0]
-            break
-    clean = re.sub(r":", "_", clean)
-    clean = re.sub(r'[^a-zA-Z0-9_\s]', '', clean)
+    clean = re.sub(r'[:\-\.,=\|\n]', ' ', clean)
+    clean = re.sub(r'[^a-zA-Z0-9\s]', '', clean)
     words = clean.lower().split()
+    if len(words) > 3:
+        words = words[:3]
     clean = "_".join(words)
     
     if clean and clean[0].isdigit(): 
         clean = "var_" + clean
-    print(clean)
-    return clean[:65]
+        
+    return clean[:40]
 
 def detect_type(note_text, default="byte"):
     lower = note_text.lower()
@@ -191,27 +177,21 @@ def parse_pointers_in_note(root_var, note_text):
     chain = {0: root_var} 
     
     for line in lines:
-
         stripped = line.strip()
-        if not stripped.startswith('+'):
-            continue
-        depth = 0
-        while depth < len(stripped) and stripped[depth] == '+':
-            depth += 1
+        if not stripped.startswith('+'): continue
             
+        depth = 0
+        while depth < len(stripped) and stripped[depth] == '+': depth += 1
         content = stripped[depth:].strip()
         match = re.match(r'^(0x[\da-fA-F]+|\d+)', content)
         if not match: continue
         
         offset_str = match.group(1)
         rest_of_line = content[len(offset_str):].strip()
-        
         if (depth - 1) not in chain: continue
         
         parent_expr = chain[depth - 1]
-    
         link_type = detect_type(rest_of_line, default="dword")
-        
         offset_expr = f"{link_type}({offset_str})"
         full_expr = f"{parent_expr} >> {offset_expr}"
         
@@ -236,10 +216,10 @@ def generate_script(game_id, notes, source):
     lines.append(f"# Code Notes for Game ID {game_id}")
     lines.append(f"# Source: {source}")
     lines.append("")
-    lines.append("from core.helpers import *")
+    lines.append("from core.helpers import byte, word, dword, tbyte, float32")
     lines.append("")
 
-    used_names = {}
+    used_names = set()
     count = 0
 
     for note in notes:
@@ -252,21 +232,15 @@ def generate_script(game_id, notes, source):
             try: addr = hex(int(str(addr)))
             except: pass
 
-        clean_text = re.sub(r'^\s*\[[^\]]+\]\s*', '', text)  # remove [bit] tags
-        clean_text = re.split(r'[\n\r|]', clean_text, 1)[0]  # stop at newline or |
-        clean_text = clean_text.replace('/', '_')            # turn / into _
-        clean_text = clean_text.strip()                      # trim spaces
-
         mem_type = detect_type(text)
-        var_name = sanitize_name(clean_text)
+        var_name = sanitize_name(text)
         if not var_name: var_name = f"unk_{addr}"
 
         if var_name in used_names:
-            used_names[var_name] += 1
             var_name = f"{var_name}_{addr}"
-        else:
-            used_names[var_name] = 1
-        # Comment Formatting
+        
+        used_names.add(var_name)
+
         type_label = "8-bit"
         if mem_type == "word": type_label = "16-bit"
         elif mem_type == "tbyte": type_label = "24-bit"
@@ -277,7 +251,6 @@ def generate_script(game_id, notes, source):
         main_note = note_lines[0]
         
         lines.append(f"# {addr}: [{type_label}] {main_note}")
-        
         for extra_line in note_lines[1:]:
             if extra_line.strip():
                 lines.append(f"#{extra_line}")
@@ -307,7 +280,7 @@ def generate_script(game_id, notes, source):
 # --- MAIN LOOP ---
 
 def main():
-    print("--- PyCheevos Note Importer (Hybrid v3) ---")
+    print("--- PyCheevos Note Importer ---")
     
     while True:
         print("")
@@ -333,10 +306,8 @@ def main():
             else:
                 print(f"\n[LOCAL] File found but empty/invalid: {file_name}")
 
-        if notes_found:
-            break
+        if notes_found: break
 
-        # Fallback to Server
         print(f"\n[INFO] No usable local notes found for ID {game_id}.")
         print("Options:")
         print("  [1] Try another Game ID")
@@ -351,8 +322,7 @@ def main():
         if choice == '2':
             server_notes = fetch_server_notes(game_id)
             if server_notes:
-                if generate_script(game_id, server_notes, "RA Server"):
-                    break
+                if generate_script(game_id, server_notes, "RA Server"): break
             else:
                 print("\n[WARN] Could not fetch notes from server.")
                 input("Press Enter to try again...")
