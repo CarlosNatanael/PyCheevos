@@ -31,7 +31,7 @@ class AchievementSet:
         self.rich_presence = rp
         return self
 
-def save(self, path: Optional[str] = None):
+    def save(self, path: Optional[str] = None):
         """
         Generates the User.txt and Rich.txt files.
         """
