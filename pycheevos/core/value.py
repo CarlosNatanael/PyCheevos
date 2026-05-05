@@ -202,12 +202,12 @@ class RecallValue(MemoryValue):
     def render(self) -> str:
         return "{recall}"
     
-    def __rshift__(self, other):
+    def __rshift__(self, other): # type: ignore
         from .condition import Condition, ConditionList
         # other is already a Condition or ConditionList — prepend recall as ADD_ADDRESS
         addr_condition = Condition(self, flag=Flag.ADD_ADDRESS)
         if isinstance(other, ConditionList):
-            return ConditionList([addr_condition] + other.conditions)
+            return ConditionList([addr_condition] + other)
         elif isinstance(other, Condition):
             return ConditionList([addr_condition, other])
         else:
