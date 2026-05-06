@@ -185,8 +185,12 @@ class MemoryValue:
         if size_str == " ":
             size_str = ""
 
+        if self.size == MemorySize.BITCOUNT:
+            return f"{self.mtype.value}0xK{hex_addr}"
+
         if size_str.startswith('f'):
             return f"{self.mtype.value}{size_str}{hex_addr}"
+            
         return f"{self.mtype.value}0x{size_str}{hex_addr}"
     
     def __str__(self):
