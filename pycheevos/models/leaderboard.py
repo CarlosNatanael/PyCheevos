@@ -7,7 +7,7 @@ class Leaderboard:
         self,
         title: str,
         description: str,
-        id: int = 111000001,
+        id: int = 0,
         format: LeaderboardFormat = LeaderboardFormat.SCORE,
         lower_is_better: bool = False
     ):

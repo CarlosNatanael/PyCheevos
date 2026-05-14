@@ -12,6 +12,7 @@ class AchievementSet:
         self.leaderboards: List[Leaderboard] = []
         self.rich_presence: Optional[RichPresence] = None
         self.next_free_id = 111001
+        self.next_free_id_lb = 111000001
 
     def add_achievement(self, achievement: Achievement):
         if achievement.id == 0:
@@ -24,6 +25,12 @@ class AchievementSet:
         return self
     
     def add_leaderboard(self, leaderboard: Leaderboard):
+        if leaderboard.id == 111000001:
+            leaderboard.id = self.next_free_id_lb
+            self.next_free_id_lb += 1
+        else:
+            if leaderboard.id >= self.next_free_id_lb:
+                self.next_free_id_lb = leaderboard.id + 1
         self.leaderboards.append(leaderboard)
         return self
     
