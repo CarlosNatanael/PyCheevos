@@ -185,8 +185,12 @@ class MemoryValue:
         if size_str == " ":
             size_str = ""
 
+        if self.size == MemorySize.BITCOUNT:
+            return f"{self.mtype.value}0xK{hex_addr}"
+
         if size_str.startswith('f'):
             return f"{self.mtype.value}{size_str}{hex_addr}"
+            
         return f"{self.mtype.value}0x{size_str}{hex_addr}"
     
     def __str__(self):
@@ -202,12 +206,12 @@ class RecallValue(MemoryValue):
     def render(self) -> str:
         return "{recall}"
     
-    def __rshift__(self, other):
+    def __rshift__(self, other): # type: ignore
         from .condition import Condition, ConditionList
         # other is already a Condition or ConditionList — prepend recall as ADD_ADDRESS
         addr_condition = Condition(self, flag=Flag.ADD_ADDRESS)
         if isinstance(other, ConditionList):
-            return ConditionList([addr_condition] + other.conditions)
+            return ConditionList([addr_condition] + other)
         elif isinstance(other, Condition):
             return ConditionList([addr_condition, other])
         else:

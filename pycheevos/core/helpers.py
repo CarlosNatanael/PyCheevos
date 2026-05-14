@@ -1,5 +1,8 @@
+from typing import Callable, Literal, Union
+
 from pycheevos.core.value import MemoryValue, RecallValue, ConstantValue
 from pycheevos.core.constants import MemorySize, Flag
+from pycheevos.core.condition import Condition, ConditionList
 
 def byte(address: int) -> MemoryValue: return MemoryValue(address, MemorySize.BIT8)
 def word(address: int) -> MemoryValue: return MemoryValue(address, MemorySize.BIT16)
@@ -40,6 +43,11 @@ def recall() -> RecallValue: return RecallValue()
 
 def value(value: int) -> ConstantValue: return ConstantValue(value)
 
+def group(*args) -> ConditionList: return ConditionList(args)
+
+def always_true() -> Condition: return value(1) == value(1)
+def always_false() -> Condition: return value(0) == value(1)
+
 # --- New Flag Helper Functions ---
 def pause_if(condition):         return condition.with_flag(Flag.PAUSE_IF)
 def reset_if(condition):         return condition.with_flag(Flag.RESET_IF)
@@ -56,3 +64,41 @@ def remember(condition):         return condition.with_flag(Flag.REMEMBER)
 def and_next(condition):         return condition.with_flag(Flag.AND_NEXT)
 def or_next(condition):          return condition.with_flag(Flag.OR_NEXT)
 def measured_percent(condition): return condition.with_flag(Flag.MEASURED_PERCENT)
+
+def string_equals(
+    address: int,
+    string: str,
+    length: int = 0,
+    transform: Union[Callable, None] = None,
+    encoding: str = "ascii",
+    endianness: Literal["little", "big"] = "big"
+) -> ConditionList:
+    conditions = ConditionList()
+    if length == 0:
+        b = string.encode(encoding)
+        length = len(b)
+    else:
+        b = string.encode(encoding)[:length]
+    for i in range(0, length, 4):
+        chunk = b[i: i + 4]
+        size = {
+            "little": {
+                1: byte,
+                2: word,
+                3: tbyte,
+                4: dword,
+            },
+            "big": {
+                1: byte,
+                2: word_be,
+                3: tbyte_be,
+                4: dword_be,
+            }
+        }[endianness][len(chunk)]
+        lvalue = size(address + i)
+        if transform is not None:
+            lvalue = transform(lvalue)
+        rvalue = value(int.from_bytes(chunk, byteorder=endianness))
+        conditions.append(and_next(lvalue == rvalue))
+    conditions = conditions.with_flag(Flag.NONE)
+    return conditions

@@ -6,25 +6,28 @@ While [`models`](https://github.com/CarlosNatanael/PyCheevos/tree/main/models) (
 
 ### Table of Contents
 
-1. [Memory Helpers](#1-memory-helpers)
-    - [Standard Sizes](#standard-sizes)
-    - [Bits & Nibbles](#bits--nibbles)
-    - [Floating Point](#floating-point)
-2. [Constants & Safety (`value`)](#2-constants--safety-value)
-3. [Enums & Constants](#3-enums--constants)
-    - [Achievement Types](#achievement-types)
-    - [Leaderboard Formats](#leaderboard-formats)
-4. [Value Modifiers](#4-value-modifiers)
-5. [Arithmetic & Pointers](#5-arithmetic--pointers)
-    - [Basic Math](#basic-math)
-    - [Pointer Chains](#pointer-chains-)
-6. [Bitwise Operations](#6-bitwise-operations-memory)
-7. [Conditions, Flags & Logic](#7-conditions-flags--logic)
-    - [Logic Helpers (New Syntax)](#logic-helpers-new-syntax)
-    - [Hit Counts](#hit-counts-with_hits)
-    - [Applying Flags (Manual)](#applying-flags-manual)
-    - [Logical Operators (Chain)](#logical-operators-chain)
-8. [Remember & Recall](#8-remember--recall)
+- [@pycheevos/core](#pycheevoscore)
+    - [Table of Contents](#table-of-contents)
+    - [1. **Memory Helpers**](#1-memory-helpers)
+      - [**Standard Sizes**](#standard-sizes)
+      - [**Bits \& Nibbles**](#bits--nibbles)
+      - [**Floating Point**](#floating-point)
+    - [2. **Constants \& Safety (`value`)**](#2-constants--safety-value)
+    - [3. **Enums \& Constants**](#3-enums--constants)
+      - [**Achievement Types**](#achievement-types)
+      - [**Leaderboard Formats**](#leaderboard-formats)
+    - [4. **Value Modifiers**](#4-value-modifiers)
+    - [5. Arithmetic \& Pointers](#5-arithmetic--pointers)
+      - [**Basic Math**](#basic-math)
+      - [**Pointer Chains** (`>>`)](#pointer-chains-)
+    - [6. **Bitwise Operations (Memory)**](#6-bitwise-operations-memory)
+    - [7. **Conditions, Flags \& Logic**](#7-conditions-flags--logic)
+      - [**Logic Helpers (New Syntax)**](#logic-helpers-new-syntax)
+      - [**Hit Counts (`.with_hits`)**](#hit-counts-with_hits)
+      - [**Applying Flags (Manual)**](#applying-flags-manual)
+      - [**Logical Operators (Chain)**](#logical-operators-chain)
+    - [8. **Remember \& Recall**](#8-remember--recall)
+    - [9. **Strings**](#9-strings)
 
 ---
 
@@ -230,3 +233,27 @@ logic = [
     byte(0xAmmo) > recall()
 ]
 ```
+
+### 9. **Strings**
+
+Use the helper method `string_equals` to generate string comparison conditions.
+
+**Parameters:**
+* `address`: (Required) Memory address to compare.
+* `string`: (Required) String value to compare.
+* `length`: Fixed string length in bytes, default to the full encoded length of `string`.
+* `transform`: Any transform method or lambda that will be applied to the left value of each condition as such: `transform(lvalue)`.
+* `endianness`: `"big"` or `"little"`, default to `"big"`.
+* `encoding`: Any python-supported encoding such as `"utf-8"`, `"utf-16"`, `"shift-jis"`... default to `"ascii"`.
+
+```python
+from pycheevos.core.helpers import string_equals, delta
+
+address = 0x1000
+# Minimal Example
+logic = string_equals(address, "Hello World")
+# Full Example
+logic = string_equals(address, "Hello World", 4, transform=delta, endianness="little", encoding="utf-8")
+```
+
+More examples at [`strings.md`](/pycheevos/examples/strings.md)
