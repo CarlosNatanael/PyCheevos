@@ -104,9 +104,13 @@ class RichPresence:
         return self.render()
 
     @staticmethod
-    def lookup(name: str, memory: MemoryValue) -> str:
+    def lookup(name: str, memory) -> str:
+        if isinstance(memory, str):
+            return f"@{name}({memory})"
         return f"@{name}({memory.render()})"
-    
+
     @staticmethod
-    def value(memory: MemoryValue, format: str = "VALUE") -> str:
-        return f"@{format}({memory.render()})"
+    def value(memory, format_type: str = "VALUE") -> str:
+        if isinstance(memory, str):
+            return f"@{format_type}({memory})"
+        return f"@{format_type}({memory.render()})"
