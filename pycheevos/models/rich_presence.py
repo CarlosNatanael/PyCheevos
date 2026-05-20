@@ -10,12 +10,11 @@ class RichPresence:
         self.formats: Dict[str, str] = {}
         self.displays: List[tuple] = []
     
-    def add_lookup(self, name: str, values: Dict[Union[int, tuple, list], str], default: Optional[str] = None):
+    def add_lookup(self, name: str, values: Dict[Union[int, tuple, list, range, str], str], default: Optional[str] = None):
         clean_dict = {}
         for key, label in values.items():
-            if isinstance(key, (tuple, list)):
-                for k in key:
-                    clean_dict[k] = label
+            if isinstance(key, list):
+                clean_dict[tuple(key)] = label
             else:
                 clean_dict[key] = label
         
@@ -24,7 +23,6 @@ class RichPresence:
         
         self.lookups[name] = clean_dict
         return self
-
     def add_format(self, name: str, format_type: str = "VALUE"):
         self.formats[name] = format_type
         return self
