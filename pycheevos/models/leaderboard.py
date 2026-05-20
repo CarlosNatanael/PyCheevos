@@ -44,16 +44,32 @@ class Leaderboard:
         self.start = self._process_args(conditions)
         return self
 
+    def add_start(self, *conditions):
+        self.start += self._process_args(conditions)
+        return self
+
     def set_cancel(self, *conditions):
         self.cancel = self._process_args(conditions)
+        return self
+
+    def add_cancel(self, *conditions):
+        self.cancel += self._process_args(conditions)
         return self
 
     def set_submit(self, *conditions):
         self.submit = self._process_args(conditions)
         return self
 
+    def add_submit(self, *conditions):
+        self.submit += self._process_args(conditions)
+        return self
+
     def set_value(self, *conditions):
         self.value = self._process_args(conditions)
+        return self
+
+    def add_value(self, *conditions):
+        self.value += self._process_args(conditions)
         return self
 
     def _render_group(self, conditions: List[Condition]) -> str:
@@ -61,7 +77,11 @@ class Leaderboard:
 
     def _render_all_groups(self, groups: List[List[Condition]]) -> str:
         if not groups: return ""
-        return "S".join([self._render_group(g) for g in groups])
+        if groups is self.value:
+            sep = "$"
+        else:
+            sep = "S"
+        return sep.join([self._render_group(g) for g in groups])
 
     def render(self) -> str:
         start = self._render_all_groups(self.start)
