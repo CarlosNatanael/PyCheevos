@@ -1,4 +1,27 @@
 # Changelog
+## [0.0.8] - 20/05/2026
+
+### Added
+- **Markdown Documentation Generator:**
+    - Added option `[6] Export Achievements to Markdown (Documentation)` to the CLI Importer (`pycheevos-import`).
+    - This feature automatically loads generated Python scripts and exports fully formatted, highly readable Markdown tables (`README_[ID].md`) representing the entire `Core` and `Alts` logic structure of a set.
+- **New Functional Helpers (PR #18):**
+    - Added `always_true()` and `always_false()` logic constants.
+    - Added `group()` as a functional shortcut to instantiate a `ConditionList`.
+    - Added `string_equals()` helper to handle byte-by-byte string comparison in memory, automatically managing character encoding (e.g., UTF-8, Shift-JIS) and endianness for modern consoles.
+
+### Changed
+- **Rich Presence Upgrade (Fixes #19):**
+    - Refactored `RichPresence.add_lookup` to natively accept grouped `tuple` and `range` objects as dictionary keys instead of flattening them prematurely.
+    - Optimized `RichPresence.render()` to dynamically detect grouped keys and output RetroAchievements' shortened lookup syntax (e.g., `0x4,0x8,0xc=Label` and inclusive ranges like `0x100-0x1ff=Label`).
+- **ConditionList Enhancement (PR #18):**
+    - Implemented a native `render()` method inside `ConditionList`, unlocking clean integration with Python f-strings for formatting complex condition chains inside Rich Presence displays.
+
+### Fixed
+- **Type Hinting (PR #18):** Fixed multiple structural type errors in `value.py` to improve linter compatibility and core predictability.
+- **Markdown Logic Rendering:** Fixed `markdown.py` missing explicit return statements in mapping fallback conditions to avoid implicit `None` boundaries inside `tabulate`.
+---
+
 ## [0.0.7] - 17/02/2026
 
 ### Added

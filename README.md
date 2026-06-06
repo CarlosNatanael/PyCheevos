@@ -18,7 +18,7 @@ You can install PyCheevos directly from PyPI:
 pip install pycheevos
 ```
 > [!NOTE]
-> Since the library is under active development, it is recommended to pin the version in your project to avoid breaking changes: `pip install pycheevos==0.0.7`
+> Since the library is under active development, it is recommended to pin the version in your project to avoid breaking changes: `pip install pycheevos==0.0.8`
 
 ### Usage
 Using this library assumes familiarity with the [RetroAchievements](https://docs.retroachievements.org) workflow and memory inspection.

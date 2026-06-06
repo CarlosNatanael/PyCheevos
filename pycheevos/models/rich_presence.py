@@ -10,12 +10,11 @@ class RichPresence:
         self.formats: Dict[str, str] = {}
         self.displays: List[tuple] = []
     
-    def add_lookup(self, name: str, values: Dict[Union[int, tuple, list], str], default: Optional[str] = None):
+    def add_lookup(self, name: str, values: Dict[Union[int, tuple, list, range, str], str], default: Optional[str] = None):
         clean_dict = {}
         for key, label in values.items():
-            if isinstance(key, (tuple, list)):
-                for k in key:
-                    clean_dict[k] = label
+            if isinstance(key, list):
+                clean_dict[tuple(key)] = label
             else:
                 clean_dict[key] = label
         
@@ -24,7 +23,6 @@ class RichPresence:
         
         self.lookups[name] = clean_dict
         return self
-
     def add_format(self, name: str, format_type: str = "VALUE"):
         self.formats[name] = format_type
         return self
@@ -54,14 +52,27 @@ class RichPresence:
         # 2. Lookups
         for name, values in self.lookups.items():
             lines.append(f"Lookup:{name}")
+
+            def get_sort_key(k):
+                if isinstance(k, int): return (0, k)
+                if isinstance(k, tuple) and k:
+                    return (0, k[0]) if isinstance(k[0], int) else (1, str(k[0]))
+                if isinstance(k, range): return (0, k.start)
+                return (1, str(k))
+
             keys = [k for k in values.keys() if k != "*"]
-            numeric_keys = sorted([k for k in keys if isinstance(k, int)])
-            string_keys = sorted([k for k in keys if not isinstance(k, int)])
-            
-            sorted_keys = numeric_keys + string_keys
+            sorted_keys = sorted(keys, key=get_sort_key)
             
             for k in sorted_keys:
-                key_str = f"0x{k:x}" if isinstance(k, int) else str(k)
+                if isinstance(k, tuple):
+                    key_str = ",".join(f"0x{x:x}" if isinstance(x, int) else str(x) for x in k)
+                elif isinstance(k, range):
+                    key_str = f"0x{k.start:x}-0x{k.stop - 1:x}"
+                elif isinstance(k, int):
+                    key_str = f"0x{k:x}"
+                else:
+                    key_str = str(k)
+                
                 lines.append(f"{key_str}={values[k]}")
             
             if "*" in values:

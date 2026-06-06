@@ -93,5 +93,5 @@ class Leaderboard:
 
         return (
             f'L{self.id}:"{start}":"{cancel}":"{submit}":"{value}":'
-            f'{self.format.value}:{self.title}:{self.description}:{lower}'
+            f'{self.format.value}:"{self.title}":{self.description}:{lower}'
         )
