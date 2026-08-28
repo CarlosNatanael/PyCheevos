@@ -57,6 +57,7 @@ class LeaderboardFormat(Enum):
     FRAMES          = "FRAMES"
     MILLISECS       = "MILLISECS"
     SECS            = "SECS"
+    TIMESECS        = "TIMESECS"
     MINUTES         = "MINUTES"
     SECS_AS_MINS    = "SECS_AS_MINS"
     VALUE           = "VALUE"
