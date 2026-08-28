@@ -17,6 +17,7 @@ FORMAT_MAPPING = {
     'TIME': 'FRAMES',
     'FRAMES': 'FRAMES',
     'MILLISECS': 'MILLISECS',
+    'TIMESECS': 'TIMESECS',
     'SECS': 'SECS',
     'VALUE': 'VALUE',
     'UNSIGNED': 'UNSIGNED',
