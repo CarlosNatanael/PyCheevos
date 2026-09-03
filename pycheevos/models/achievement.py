@@ -10,7 +10,7 @@ class Achievement:
         points: int,
         id: int = 0,
         subset_id: int = 0,
-        badge: str = "00000",
+        badge: str = "",
         type: Union[AchievementType, str] = AchievementType.STANDARD
     ):
         self.id = id
@@ -79,8 +79,9 @@ class Achievement:
         full_id = f"{self.id}"
         if self.subset_id != 0:
             full_id = f"{self.id}|{self.subset_id}"
+        badge_str = f"{self.badge}" if self.badge and self.badge != "00000" else ""
         
         return (
             f'{full_id}:"{full_mem}":"{safe_title}":"{safe_desc}"'
-            f':::{self.type}:{self.author}:{self.points}:::::{self.badge}'
+            f':::{self.type}:{self.author}:{self.points}:::::{badge_str}'
         )
