@@ -26,7 +26,24 @@ class MemoryExpression:
         new_expr.terms.append((last_term, Flag.ADD_ADDRESS))
         new_expr.terms.append((other, Flag.ADD_SOURCE))
         return new_expr
-    
+
+    def __mul__(self, other):
+        return self._build_conditions("*", other)
+
+    def __rmul__(self, other):
+        return self.__mul__(other)
+
+    def __truediv__(self, other):
+        return self._build_conditions("/", other)
+
+    def __mod__(self, other):
+        return self._build_conditions("%", other)
+
+    def __and__(self, other):
+        return self._build_conditions("&", other)
+
+    def __xor__(self, other):
+        return self._build_conditions("^", other)
 
     def _apply_modifier(self, method_name):
         new_expr = MemoryExpression(self.terms[0][0], self.terms[0][1])
@@ -101,7 +118,16 @@ class MemoryExpression:
             conditions.append(Condition(last_val, cmp=cmp, rvalue=rvalue))
 
         return ConditionList(conditions)
-    
+
+    def render(self) -> str:
+        return self._build_conditions( "", None).render()
+
+    def __str__(self) -> str:
+        return self.render()
+
+    def __repr__(self) -> str:
+        return self.render()
+
     def __eq__(self, other): return self._build_conditions("=", other) # type: ignore[override]
     def __ne__(self, other): return self._build_conditions("!=", other) # type: ignore[override]
     def __gt__(self, other): return self._build_conditions(">", other)

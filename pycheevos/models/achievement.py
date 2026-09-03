@@ -3,8 +3,18 @@ from pycheevos.core.condition import Condition
 from pycheevos.core.constants import AchievementType
 
 class Achievement:
-    def __init__(self, title: str, description: str, points: int, id: int = 0, badge: str = "", type: Union[AchievementType, str] = AchievementType.STANDARD):
+    def __init__(
+        self,
+        title: str,
+        description: str,
+        points: int,
+        id: int = 0,
+        subset_id: int = 0,
+        badge: str = "",
+        type: Union[AchievementType, str] = AchievementType.STANDARD
+    ):
         self.id = id
+        self.subset_id = subset_id
         self.title = title
         self.description = description
         self.points = points
@@ -66,9 +76,12 @@ class Achievement:
             
         safe_title = self.title.replace('"', '\\"')
         safe_desc = self.description.replace('"', '\\"')
+        full_id = f"{self.id}"
+        if self.subset_id != 0:
+            full_id = f"{self.id}|{self.subset_id}"
         badge_str = f"{self.badge}" if self.badge and self.badge != "00000" else ""
         
         return (
-            f'{self.id}:"{full_mem}":"{safe_title}":"{safe_desc}"'
+            f'{full_id}:"{full_mem}":"{safe_title}":"{safe_desc}"'
             f':::{self.type}:{self.author}:{self.points}:::::{badge_str}'
         )

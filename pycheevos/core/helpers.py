@@ -1,6 +1,6 @@
 from typing import Callable, Literal, Union
 
-from pycheevos.core.value import MemoryValue, RecallValue, ConstantValue
+from pycheevos.core.value import MemoryExpression, MemoryValue, RecallValue, ConstantValue
 from pycheevos.core.constants import MemorySize, Flag
 from pycheevos.core.condition import Condition, ConditionList
 
@@ -34,10 +34,10 @@ def double32(address: int) -> MemoryValue: return MemoryValue(address, MemorySiz
 def double32_be(address: int) -> MemoryValue: return MemoryValue(address, MemorySize.DOUBLE32_BE)
 
 
-def prior(mem: MemoryValue) -> MemoryValue: return mem.prior()
-def delta(mem: MemoryValue) -> MemoryValue: return mem.delta()
-def bcd(mem: MemoryValue) -> MemoryValue:   return mem.bcd()
-def invert(mem: MemoryValue) -> MemoryValue: return mem.invert()
+def prior(mem: MemoryValue | MemoryExpression): return mem.prior()
+def delta(mem: MemoryValue | MemoryExpression): return mem.delta()
+def bcd(mem: MemoryValue | MemoryExpression):   return mem.bcd()
+def invert(mem: MemoryValue): return mem.invert()
 
 def recall() -> RecallValue: return RecallValue()
 

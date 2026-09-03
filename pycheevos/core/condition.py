@@ -64,6 +64,18 @@ class ConditionList(list):
     def __repr__(self):
         return self.render()
 
+    def __rshift__(self, other):
+        from pycheevos.core.value import MemoryExpression
+        
+        flag = self[0].flag
+        expr = MemoryExpression(self[0].with_flag(Flag.NONE), start_flag=flag)
+        for term in self[1:]:
+            flag = term.flag
+            expr.terms.append((term.with_flag(Flag.NONE), flag))
+        expr.terms[-1] = (expr.terms[-1][0], Flag.ADD_ADDRESS)
+        expr.terms.append((other, Flag.ADD_ADDRESS))
+        return expr
+
 
 class Condition:
     def __init__(
