@@ -8,10 +8,12 @@ class Leaderboard:
         title: str,
         description: str,
         id: int = 0,
+        subset_id: int = 0,
         format: LeaderboardFormat = LeaderboardFormat.SCORE,
         lower_is_better: bool = False
     ):
         self.id = id
+        self.subset_id = subset_id
         self.title = title
         self.description = description
         self.format = format
@@ -90,8 +92,11 @@ class Leaderboard:
         value = self._render_all_groups(self.value)
         
         lower = "1" if self.lower_is_better else "0"
+        full_id = f"{self.id}"
+        if self.subset_id != 0:
+            full_id = f"{self.id}|{self.subset_id}"
 
         return (
-            f'L{self.id}:"{start}":"{cancel}":"{submit}":"{value}":'
+            f'L{full_id}:"{start}":"{cancel}":"{submit}":"{value}":'
             f'{self.format.value}:"{self.title}":{self.description}:{lower}'
         )
