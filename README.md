@@ -101,6 +101,7 @@ game_set.save()
 * [CarlosNatanael/RA-Scripts-py](https://github.com/CarlosNatanael/RA-Scripts-py)
 * [Player1041/PyCheevos-Scripts](https://github.com/Player1041/PyCheevos-Scripts)
 * [wormi-ra/RA-Scripts](https://github.com/wormi-ra/RA-Scripts)
+* [blobdash/RASets](https://github.com/blobdash/RASets)
 
 > [!IMPORTANT]
 > **Your repo here?** *Make a PR and add it!*
