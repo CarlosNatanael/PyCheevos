@@ -23,7 +23,7 @@ class AchievementSet:
                 self.next_free_id = achievement.id + 1
         self.achievements.append(achievement)
         return self
-    
+
     def add_leaderboard(self, leaderboard: Leaderboard):
         if leaderboard.id == 111000001:
             leaderboard.id = self.next_free_id_lb
@@ -33,12 +33,76 @@ class AchievementSet:
                 self.next_free_id_lb = leaderboard.id + 1
         self.leaderboards.append(leaderboard)
         return self
-    
+
     def add_rich_presence(self, rp: RichPresence):
         self.rich_presence = rp
         return self
 
-    def save(self, path: Optional[str] = None):
+    def apply_badges_from_json(self, path: Optional[str] = None):
+        """
+        Reads <game_id>.json and patches badge IDs into the written User.txt.
+        Only overwrites badges that are unset ("" or "00000").
+        """
+        import json
+
+        if path is None:
+            root = Path.cwd()
+            json_dir = root / "output" / f"{self.title} - {self.game_id}"
+        else:
+            json_dir = Path(path)
+
+        json_file = json_dir / f"{self.game_id}.json"
+        user_file = json_dir / f"{self.game_id}-User.txt"
+
+        if not json_file.exists():
+            print(f"[WARNING] JSON file not found: {json_file}")
+            return self
+        if not user_file.exists():
+            print(f"[WARNING] User.txt not found — run save() before apply_badges_from_json()")
+            return self
+
+        try:
+            with open(json_file, 'r', encoding='utf-8') as f:
+                game_data = json.load(f)
+        except Exception as e:
+            print(f"[WARNING] Could not read JSON: {e}")
+            return self
+
+        # Support both top-level and Sets[0] Achievements
+        server_achs = game_data.get('Achievements') or game_data.get('Sets', [{}])[0].get('Achievements', [])
+
+        id_to_badge = {}
+        for s_ach in server_achs:
+            a_id = s_ach.get('ID')
+            badge = s_ach.get('BadgeName')
+            if a_id and badge:
+                id_to_badge[int(a_id)] = str(badge)
+
+        if not id_to_badge:
+            print(f"[WARNING] No badges found in {json_file.name}")
+            return self
+
+        lines = user_file.read_text(encoding="utf-8").splitlines()
+        updated = []
+        matched = 0
+        for line in lines:
+            parts = line.split(":", 1)
+            if parts[0].isdigit():
+                ach_id = int(parts[0])
+                if ach_id in id_to_badge:
+                    fields = line.rsplit(":", 1)
+                    if fields[1] in ("", "00000"):
+                        line = fields[0] + ":" + id_to_badge[ach_id]
+                        matched += 1
+                        print(f"[BADGE] {ach_id} -> {id_to_badge[ach_id]}")
+            updated.append(line)
+
+        user_file.write_text("\n".join(updated) + "\n", encoding="utf-8")
+        
+        print(f"[BADGES] Applied {matched} badges to {user_file}")
+        return self
+
+    def save(self, path: Optional[str] = None, pull_badges: Optional[bool] = False):
         """
         Generates the User.txt and Rich.txt files.
         """
@@ -49,7 +113,7 @@ class AchievementSet:
             output = Path(path)
 
         output.mkdir(parents=True, exist_ok=True)
-        
+
         # 1. Saves Achievements/Leaderboards (User.txt)
         user_file = output / f"{self.game_id}-User.txt"
         json_file = output / f"{self.game_id}.json"
@@ -60,21 +124,26 @@ class AchievementSet:
                 with open(json_file, 'r', encoding='utf-8') as jf:
                     game_data = json.load(jf)
 
+                    
                     # --- Synchronize Achievements ---
                     server_achs = game_data.get('Achievements', [])
                     title_to_id, desc_to_id, mem_to_id = {}, {}, {}
+                    id_to_badge = {}
 
                     for s_ach in server_achs:
                         a_id = s_ach.get('ID')
-                        if not a_id: continue
-                        
-                        if 'Title' in s_ach: 
+                        if not a_id:
+                            continue
+
+                        if 'Title' in s_ach:
                             title_to_id[s_ach['Title'].lower().strip()] = a_id
-                        if 'Description' in s_ach: 
+                        if 'Description' in s_ach:
                             desc_to_id[s_ach['Description'].lower().strip()] = a_id
-                        if 'Mem' in s_ach: 
+                        if 'Mem' in s_ach:
                             mem_to_id[s_ach['Mem']] = a_id
-                    
+                        if 'BadgeName' in s_ach:
+                            id_to_badge[int(a_id)] = str(s_ach['BadgeName'])
+
                     for ach in self.achievements:
                         # Rebuilds the memory string for the logic fallback
                         core_string = ach._render_group(ach.core)
@@ -83,11 +152,10 @@ class AchievementSet:
                         else:
                             full_mem = core_string
 
-                        # Variáveis seguras e minúsculas para a busca
                         safe_title = ach.title.lower().strip()
                         safe_desc = ach.description.lower().strip()
 
-                        # The Smart Waterfall (agora case-insensitive)
+                        # Smart Waterfall (case-insensitive)
                         if safe_title in title_to_id:
                             ach.id = int(title_to_id[safe_title])
                         elif safe_desc in desc_to_id:
@@ -101,16 +169,17 @@ class AchievementSet:
 
                     for s_lb in server_lbs:
                         l_id = s_lb.get('ID')
-                        if not l_id: continue
-                        if 'Title' in s_lb: 
+                        if not l_id:
+                            continue
+                        if 'Title' in s_lb:
                             lb_title_to_id[s_lb['Title'].lower().strip()] = l_id
-                        if 'Description' in s_lb: 
+                        if 'Description' in s_lb:
                             lb_desc_to_id[s_lb['Description'].lower().strip()] = l_id
-                    
+
                     for lb in self.leaderboards:
                         safe_lb_title = lb.title.lower().strip()
                         safe_lb_desc = lb.description.lower().strip()
-                        
+
                         if safe_lb_title in lb_title_to_id:
                             lb.id = int(lb_title_to_id[safe_lb_title])
                         elif safe_lb_desc in lb_desc_to_id:
@@ -121,13 +190,13 @@ class AchievementSet:
                 print(f"[WARNING] Could not sync IDs from JSON: {e}")
 
         preserved_notes = []
-        
+
         mode = "r+" if user_file.exists() else "w"
         with open(user_file, mode, encoding="utf-8", errors="ignore") as f:
             if mode == "r+":
                 preserved_notes = [line.strip() for line in f if line.startswith("N0:")]
                 f.seek(0)
-                
+
             f.write("1.0\n")
             f.write(f"{self.title}\n")
             for ach in self.achievements:
@@ -147,6 +216,8 @@ class AchievementSet:
             if mode == "r+":
                 f.truncate()
         print(f"Generated User file: {user_file}")
+        if pull_badges:
+            self.apply_badges_from_json(path)
 
         # 2. Saves Rich Presence (Rich.txt)
         if self.rich_presence:
