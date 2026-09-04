@@ -9,9 +9,10 @@ class Achievement:
         description: str,
         points: int,
         id: int = 0,
-        subset_id: int = 0,
-        badge: str = "",
-        type: Union[AchievementType, str] = AchievementType.STANDARD
+        badge: str = "00000",
+        type: Union[AchievementType, str] = AchievementType.STANDARD,
+        *,
+        subset_id: int = 0
     ):
         self.id = id
         self.subset_id = subset_id
@@ -29,7 +30,7 @@ class Achievement:
         self.core: List[Condition] = []
         self.alts: List[List[Condition]] = []
         self.conditions: List[Condition] = []
-
+        
     def _flatten(self, items) -> List[Condition]:
         flat_list = []
 
@@ -79,9 +80,9 @@ class Achievement:
         full_id = f"{self.id}"
         if self.subset_id != 0:
             full_id = f"{self.id}|{self.subset_id}"
-        badge_str = f"{self.badge}" if self.badge and self.badge != "00000" else ""
+
         
         return (
             f'{full_id}:"{full_mem}":"{safe_title}":"{safe_desc}"'
-            f':::{self.type}:{self.author}:{self.points}:::::{badge_str}'
+            f':::{self.type}:{self.author}:{self.points}:::::{self.badge}'
         )
