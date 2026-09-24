@@ -266,7 +266,7 @@ def parse_condition(cond_str: str):
 
 def parse_logic(mem_string):
     if not mem_string: return []
-    groups = mem_string.split('S')
+    groups = re.split(r'(?:S.:)', mem_string)
     parsed_groups = []
     for i, group in enumerate(groups):
         conditions = []

@@ -173,7 +173,7 @@ def parse_condition(cond_str: str):
 
 def parse_logic(mem_string):
     if not mem_string: return []
-    groups = mem_string.split('S')
+    groups = re.split(r'S.:', mem_string)
     parsed_groups = []
     for i, group in enumerate(groups):
         conditions = []
@@ -196,7 +196,7 @@ def parse_lb_logic(mem_string):
         elif code == "SUB:": target = 'submit'
         elif code == "VAL:": target = 'value'
         if target:
-            groups = logic_str.split('S')
+            groups = re.split(r'(?:S.:)', logic_str)
             for group_str in groups:
                 group_conds = []
                 for cond in group_str.split('_'):
