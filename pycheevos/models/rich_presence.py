@@ -52,18 +52,10 @@ class RichPresence:
         # 2. Lookups
         for name, values in self.lookups.items():
             lines.append(f"Lookup:{name}")
-
-            def get_sort_key(k):
-                if isinstance(k, int): return (0, k)
-                if isinstance(k, tuple) and k:
-                    return (0, k[0]) if isinstance(k[0], int) else (1, str(k[0]))
-                if isinstance(k, range): return (0, k.start)
-                return (1, str(k))
-
+ 
             keys = [k for k in values.keys() if k != "*"]
-            sorted_keys = sorted(keys, key=get_sort_key)
-            
-            for k in sorted_keys:
+ 
+            for k in keys:
                 if isinstance(k, tuple):
                     key_str = ",".join(f"0x{x:x}" if isinstance(x, int) else str(x) for x in k)
                 elif isinstance(k, range):
@@ -72,9 +64,9 @@ class RichPresence:
                     key_str = f"0x{k:x}"
                 else:
                     key_str = str(k)
-                
+ 
                 lines.append(f"{key_str}={values[k]}")
-            
+ 
             if "*" in values:
                 lines.append(f"*={values['*']}")
             lines.append("")
