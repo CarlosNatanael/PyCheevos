@@ -206,7 +206,7 @@ def parse_lb_logic(mem_string):
         elif code == "VAL:": target = 'value'
         
         if target:
-            groups = logic_str.split('S')
+            groups = re.split(r'(?:S.:)', logic_str)
             for group_str in groups:
                 group_conds = []
                 for cond in group_str.split('_'):
